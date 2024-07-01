@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_menu/presentation/screens/partner/home_screen.dart';
-import 'package:smart_menu/presentation/screens/partner/playlist_screen.dart';
+import 'package:smart_menu/presentation/screens/partner/dashboard.dart';
 import 'package:smart_menu/presentation/screens/shared/login_screen.dart';
 import 'package:smart_menu/presentation/screens/shared/profile.dart';
 
@@ -20,37 +19,39 @@ class NavigatorProviderState extends State<NavigatorProvider> {
     // final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        indicatorColor: const Color.fromARGB(255, 202, 202, 201),
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Badge(child: Icon(Icons.notifications_sharp)),
-            label: 'Notifications',
-          ),
-          NavigationDestination(
-            icon: Badge(
-              label: Text('2'),
-              child: Icon(Icons.account_circle),
-            ),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: currentPageIndex != 1
+          ? NavigationBar(
+              onDestinationSelected: (int index) {
+                setState(() {
+                  currentPageIndex = index;
+                });
+              },
+              indicatorColor: const Color.fromARGB(255, 202, 202, 201),
+              selectedIndex: currentPageIndex,
+              destinations: const <Widget>[
+                NavigationDestination(
+                  selectedIcon: Icon(Icons.home),
+                  icon: Icon(Icons.home_outlined),
+                  label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: Badge(child: Icon(Icons.notifications_sharp)),
+                  label: 'Notifications',
+                ),
+                NavigationDestination(
+                  icon: Badge(
+                    label: Text('2'),
+                    child: Icon(Icons.account_circle),
+                  ),
+                  label: 'Profile',
+                ),
+              ],
+            )
+          : null,
       body: IndexedStack(
         index: currentPageIndex,
         children: const <Widget>[
-          PlaylistScreen(),
+          DashboardScreen(),
           LoginScreen(),
           ProfileScreen(),
         ],
