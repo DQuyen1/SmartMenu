@@ -37,6 +37,9 @@ dependencies:
   dio: ^5.4.3+1
   flutter_riverpod: ^2.5.1
   shimmer: ^3.0.0
+  http: ^1.2.0
+  intl: ^0.19.0
+  fl_chart: ^0.55.2  # Or the latest version available
 
 dev_dependencies:
   flutter_test:
