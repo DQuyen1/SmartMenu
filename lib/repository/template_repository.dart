@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'package:smart_menu/config/base_service.dart';
-import 'package:smart_menu/models/template.dart'; // Replace with your template model
+import 'package:smart_menu/models/template.dart';
 
 class TemplateRepository {
-  static const url =
+  final String url =
       'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Templates?pageNumber=1&pageSize=10';
 
   BaseService service = BaseService();
@@ -15,7 +15,6 @@ class TemplateRepository {
 
       if (response.statusCode == 200) {
         final List<dynamic> templates = response.data;
-
         return templates
             .map((template) => Template.fromJson(template))
             .toList();
@@ -28,26 +27,20 @@ class TemplateRepository {
     }
   }
 
-  Future<bool> createTemplate(Map<String, dynamic> requestBody) async {
+  Future<bool> updateTemplate(
+      String templateId, Map<String, dynamic> requestBody) async {
     try {
-      final response = await service.post(url, data: requestBody);
+      final response = await service.put(
+        '$url/$templateId',
+        data: requestBody,
+        queryParameters: null,
+        statusCodes: [],
+      );
 
-      if (response.statusCode == 201) return true;
+      if (response.statusCode == 204) return true;
       return false;
     } catch (e) {
-      throw Exception('Error creating template: $e');
+      throw Exception('Error updating template: $e');
     }
   }
-
-  // Future<bool> updateTemplate(Map<String, dynamic> requestBody) async {
-  //   try {
-  //     final response =
-  //         await service.put(url, statusCodes: [200, 204], data: requestBody);
-
-  //     if (response.statusCode == 204) return true;
-  //     return false;
-  //   } catch (e) {
-  //     throw Exception('Error updating template: $e');
-  //   }
-  // }
 }

@@ -6,7 +6,7 @@ class Template {
   final int templateWidth;
   final int templateHeight;
   final String templateImgPath;
-  final List<dynamic>? layers; // Adjust type according to actual data type
+  final List<dynamic>? layers;
   final bool isDeleted;
 
   Template({
@@ -30,7 +30,7 @@ class Template {
       templateWidth: json['templateWidth'],
       templateHeight: json['templateHeight'],
       templateImgPath: json['templateImgPath'],
-      layers: json['layers'], // Adjust type according to actual data type
+      layers: json['layers'],
       isDeleted: json['isDeleted'],
     );
   }
