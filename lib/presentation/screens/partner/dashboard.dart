@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:smart_menu/presentation/screens/manage_menu.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final String userId;
+  final int brandId;
+
+  const DashboardScreen(
+      {super.key, required this.userId, required this.brandId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Dashboard'),
-          backgroundColor: Color(0xFF1976D2)), // Example app bar color
+        title: const Text('Dashboard'),
+        backgroundColor: const Color(0xFF1976D2), // Example app bar color
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -18,12 +24,13 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section 1: Key Metrics
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                _buildMetricCard("Total Sales", "\$5,000", Colors.blue),
-                _buildMetricCard("New Orders", "25", Colors.green),
-              ]
-                  // ... more metric cards
-                  ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildMetricCard("Total Sales", "\$5,000", Colors.blue),
+                  _buildMetricCard("New Orders", "25", Colors.green),
+                ],
+              ),
               const SizedBox(height: 20),
 
               // Section 2: Charts or Graphs
@@ -32,13 +39,37 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Section 3: Recent Activity
-              const Text("Recent Activity",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                "Recent Activity",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               _buildActivityItem(
-                  "Order #1234 placed", Icons.shopping_cart, Colors.orange),
-              _buildActivityItem("Payment received for Order #5678",
-                  Icons.attach_money, Colors.green),
+                "Order #1234 placed",
+                Icons.shopping_cart,
+                Colors.orange,
+              ),
+              _buildActivityItem(
+                "Payment received for Order #5678",
+                Icons.attach_money,
+                Colors.green,
+              ),
               // ... more activity items
+
+              // Manage Menu Button
+              const SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MenuListScreen(brandId: brandId),
+                      ),
+                    );
+                  },
+                  child: const Text('Manage Menu'),
+                ),
+              ),
             ],
           ),
         ),
@@ -60,7 +91,7 @@ class DashboardScreen extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 color.withOpacity(0.8),
-                color.withOpacity(0.4)
+                color.withOpacity(0.4),
               ], // Gradient example
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -69,11 +100,18 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 18)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18),
+              ),
               const SizedBox(height: 8),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -90,9 +128,13 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 200,

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/presentation/widgets/custom_text_field.dart';
 import 'dart:io';
-import 'package:smart_menu/presentation/widgets/custom_navigation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -51,7 +52,18 @@ class _LoginScreenState extends State<LoginScreen> {
           String reply = await response.transform(utf8.decoder).join();
           final Map<String, dynamic> responseData = jsonDecode(reply);
 
-          // Handle the response data as needed
+          // Extract userId and token
+          final userId = responseData['userId'];
+          final token = responseData['token'];
+
+          // Store userId and token securely
+          await _storage.write(key: 'userId', value: userId);
+          await _storage.write(key: 'token', value: token);
+
+          // Fetch and store brandId
+          await _fetchAndStoreBrandId(userId, token);
+
+          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
@@ -59,16 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
 
-          // Navigate to HomeScreen wrapped in NavigatorProvider
           Navigator.pushReplacementNamed(context, '/home');
         } else {
-          // Handle API errors
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('API Error: ${response.statusCode}')),
           );
         }
       } on HandshakeException catch (e) {
-        print('HandshakeException: $e'); // Print to console for debugging
+        print('HandshakeException: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
@@ -81,6 +91,51 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(content: Text('Error during login: $e')),
         );
       }
+    }
+  }
+
+  Future<void> _fetchAndStoreBrandId(String userId, String token) async {
+    try {
+      HttpClient client = HttpClient();
+      client.badCertificateCallback =
+          ((X509Certificate cert, String host, int port) => true);
+
+      // Create the request
+      HttpClientRequest request = await client.getUrl(
+        Uri.parse(
+            'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/BrandStaffs?userId=$userId&pageNumber=1&pageSize=10'),
+      );
+
+      // Set the headers
+      request.headers.set('Authorization', 'Bearer $token');
+      request.headers.set('Content-Type', 'application/json');
+
+      // Get the response
+      HttpClientResponse response = await request.close();
+
+      if (response.statusCode == 200) {
+        String reply = await response.transform(utf8.decoder).join();
+        final List<dynamic> brandStaffList = jsonDecode(reply);
+
+        if (brandStaffList.isNotEmpty) {
+          final brandId = brandStaffList[0]['brandId'].toString();
+
+          // Store brandId securely
+          await _storage.write(key: 'brandId', value: brandId);
+        } else {
+          throw Exception('No brand associated with this user');
+        }
+      } else {
+        String errorResponse = await response.transform(utf8.decoder).join();
+        print('Error Response: $errorResponse');
+        throw Exception(
+            'Failed to fetch brand details. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching brandId: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching brandId: $e')),
+      );
     }
   }
 
