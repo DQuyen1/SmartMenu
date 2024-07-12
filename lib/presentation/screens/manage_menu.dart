@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/menu.dart';
 import 'package:smart_menu/repository/menu_repository.dart';
@@ -18,17 +17,17 @@ class _MenuListScreenState extends State<MenuListScreen> {
   final MenuRepository _menuRepository = MenuRepository();
   late Future<List<Menu>> _futureMenus;
 
+  void _fetchMenus() {
+    setState(() {
+      _futureMenus = _menuRepository.getAll(widget.brandId);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _fetchMenus();
     HttpOverrides.global = _DevHttpOverrides();
-  }
-
-  void _fetchMenus() {
-    setState(() {
-      _futureMenus = _menuRepository.getAll();
-    });
   }
 
   void _navigateToMenuForm({Menu? menu}) async {
@@ -67,16 +66,15 @@ class _MenuListScreenState extends State<MenuListScreen> {
     );
 
     if (confirmed == true) {
-      final fail = await _menuRepository.deleteMenu(menuId);
-      if (fail) {
+      final success = await _menuRepository.deleteMenu(menuId);
+      if (success) {
         _fetchMenus(); // Refresh the menu list
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Fail deleted successfully')),
+          const SnackBar(content: Text('Menu deleted successfully')),
         );
       } else {
-        _fetchMenus();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Menu deleted successfully')),
+          const SnackBar(content: Text('Failed to delete menu')),
         );
       }
     }

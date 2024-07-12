@@ -8,11 +8,12 @@ class MenuRepository {
 
   final BaseService service = BaseService();
 
-  Future<List<Menu>> getAll() async {
+  Future<List<Menu>> getAll(int brandId) async {
     try {
       final response = await service.get(url, queryParameters: {
         'pageNumber': 1,
         'pageSize': 10,
+        'brandId': brandId,
       });
       log(response.toString());
 

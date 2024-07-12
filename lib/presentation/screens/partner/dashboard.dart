@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_menu/presentation/screens/manage_menu.dart';
+import 'package:smart_menu/presentation/screens/manage_template.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String userId;
@@ -70,6 +71,20 @@ class DashboardScreen extends StatelessWidget {
                   child: const Text('Manage Menu'),
                 ),
               ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TemplateListScreen(brandId: brandId),
+                      ),
+                    );
+                  },
+                  child: const Text('Manage Template'),
+                ),
+              )
             ],
           ),
         ),
