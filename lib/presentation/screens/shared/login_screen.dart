@@ -59,13 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
           final token = responseData['token'];
           final brandId = responseData['brandId'].toString();
           final roleId = responseData['roleId'].toString();
+          final storeId = responseData['storeId'].toString();
 
           // Store userId, token, brandId, and roleId securely
           await _storage.write(key: 'userId', value: userId);
           await _storage.write(key: 'token', value: token);
           await _storage.write(key: 'brandId', value: brandId);
           await _storage.write(key: 'roleId', value: roleId);
-
+          await _storage.write(key: 'storeId', value: storeId);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Login successful!'),
@@ -78,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
               builder: (context) => DashboardScreen(
                 userId: userId,
                 brandId: int.parse(brandId),
+                storeId: int.parse(storeId),
               ),
             ),
           );
