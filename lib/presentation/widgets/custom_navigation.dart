@@ -54,6 +54,7 @@ class NavigatorProviderState extends State<NavigatorProvider> {
           DashboardScreen(
             userId: '',
             brandId: 0,
+            storeId: 0,
           ),
           LoginScreen(),
           ProfileScreen(),

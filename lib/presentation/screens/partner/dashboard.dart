@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_menu/presentation/screens/manage_menu.dart';
+import 'package:smart_menu/presentation/screens/manage_store_collection.dart';
+import 'package:smart_menu/presentation/screens/manage_store_device.dart';
+import 'package:smart_menu/presentation/screens/manage_store_menu.dart';
 import 'package:smart_menu/presentation/screens/manage_template.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String userId;
   final int brandId;
+  final int storeId;
 
   const DashboardScreen(
-      {super.key, required this.userId, required this.brandId});
+      {super.key,
+      required this.userId,
+      required this.brandId,
+      required this.storeId});
 
   @override
   Widget build(BuildContext context) {
@@ -54,37 +61,75 @@ class DashboardScreen extends StatelessWidget {
                 Icons.attach_money,
                 Colors.green,
               ),
-              // ... more activity items
-
-              // Manage Menu Button
               const SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MenuListScreen(brandId: brandId),
-                      ),
-                    );
-                  },
-                  child: const Text('Manage Menu'),
-                ),
+
+              // Section 4: Manage Buttons
+              Wrap(
+                spacing: 10.0,
+                runSpacing: 10.0,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MenuListScreen(brandId: brandId),
+                        ),
+                      );
+                    },
+                    child: const Text('Manage Menu'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TemplateListScreen(brandId: brandId),
+                        ),
+                      );
+                    },
+                    child: const Text('Manage Template'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              StoreMenuListScreen(storeId: storeId),
+                        ),
+                      );
+                    },
+                    child: const Text('Manage Store Menu'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              StoreDeviceListScreen(storeId: storeId),
+                        ),
+                      );
+                    },
+                    child: const Text('Manage Store Device'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              StoreCollectionListScreen(storeId: storeId),
+                        ),
+                      );
+                    },
+                    child: const Text('Manage Store Collection'),
+                  ),
+                ],
               ),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TemplateListScreen(brandId: brandId),
-                      ),
-                    );
-                  },
-                  child: const Text('Manage Template'),
-                ),
-              )
             ],
           ),
         ),
