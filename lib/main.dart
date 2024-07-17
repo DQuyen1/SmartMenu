@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/presentation/screens/display_image.dart';
 import 'package:smart_menu/presentation/screens/display_image.dart';
+import 'package:smart_menu/presentation/screens/partner/display_image_form.dart';
 
 void main() {
   HttpOverrides.global = _DevHttpOverrides();
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ImageListScreen(displayId: 298),
+      home: DisplayIdInputScreen(),
     );
   }
 }
