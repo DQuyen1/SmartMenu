@@ -5,6 +5,7 @@ import 'package:smart_menu/presentation/screens/manage_menu.dart';
 import 'package:smart_menu/presentation/screens/manage_store_collection.dart';
 import 'package:smart_menu/presentation/screens/manage_store_device.dart';
 import 'package:smart_menu/presentation/screens/manage_store_menu.dart';
+import 'package:smart_menu/presentation/screens/manage_store_product.dart';
 import 'package:smart_menu/presentation/screens/manage_template.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -128,6 +129,18 @@ class DashboardScreen extends StatelessWidget {
                     },
                     child: const Text('Manage Store Collection'),
                   ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              StoreProductListScreen(storeId: storeId),
+                        ),
+                      );
+                    },
+                    child: const Text('Manage Store Product'),
+                  ),
                 ],
               ),
             ],
@@ -137,7 +150,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Helper functions to build UI elements
   Widget _buildMetricCard(String title, String value, Color color) {
     return SizedBox(
       width: 170,

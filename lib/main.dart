@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_menu/presentation/screens/display_image.dart';
 import 'package:smart_menu/presentation/screens/display_image.dart';
 import 'package:smart_menu/presentation/screens/partner/display_image_form.dart';
+import 'package:smart_menu/presentation/screens/shared/login_screen.dart';
 
 void main() {
   HttpOverrides.global = _DevHttpOverrides();
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: DisplayIdInputScreen(),
+      home: LoginScreen(),
     );
   }
 }
