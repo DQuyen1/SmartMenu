@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/store_device.dart';
+import 'package:smart_menu/presentation/screens/display_device.dart';
+import 'package:smart_menu/presentation/screens/partner/display_device_form.dart';
 import 'package:smart_menu/repository/store_device_repository.dart';
 import 'package:smart_menu/presentation/screens/partner/store_device_form.dart';
 
@@ -119,6 +121,18 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
                         icon: const Icon(Icons.delete),
                         onPressed: () =>
                             _deleteStoreDevice(storeDevice.storeDeviceId),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DisplayDevice(
+                                  deviceId: storeDevice.storeDeviceId),
+                            ),
+                          );
+                        },
+                        child: const Text('Display'),
                       ),
                     ],
                   ),

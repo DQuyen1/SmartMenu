@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('API Error: ${response.statusCode}')),
+            SnackBar(content: Text('Incorrect username or password')),
           );
         }
       } on HandshakeException catch (e) {
