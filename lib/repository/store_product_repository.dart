@@ -10,7 +10,8 @@ class StoreProductRepository {
 
   Future<List<StoreProduct>> getAll(int storeId) async {
     try {
-      final response = await service.get(url, queryParameters: {
+      final response =
+          await service.get('$url/productsizeprices', queryParameters: {
         'pageNumber': 1,
         'pageSize': 10,
         'storeId': storeId,
