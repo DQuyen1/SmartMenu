@@ -1,6 +1,22 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:smart_menu/repository/device_display_repository.dart';
-import 'package:smart_menu/repository/get_image.dart';
+import 'package:http/http.dart' as http;
+
+Future<List<Image>> fetchDeviceDisplay(int deviceId) async {
+  final url =
+      'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Displays/V1/$deviceId/image';
+  print('Fetching images from URL: $url');
+  final response = await http.get(Uri.parse(url));
+  print('Response status: ${response.statusCode}');
+  print('Response body: ${response.body}');
+
+  if (response.statusCode == 200) {
+    return [Image.memory(response.bodyBytes)];
+  } else {
+    throw Exception('Failed to load images');
+  }
+}
 
 class DisplayDevice extends StatefulWidget {
   final int deviceId;
@@ -13,13 +29,33 @@ class DisplayDevice extends StatefulWidget {
 
 class _DisplayDeviceState extends State<DisplayDevice> {
   late Future<List<Image>> _futureImages;
+  late Timer _timer;
   bool _showImages = true;
   bool _isHovering = false;
 
   @override
   void initState() {
     super.initState();
-    _futureImages = FetchDeviceDisplay(widget.deviceId);
+    _fetchImages();
+    _startTimer();
+  }
+
+  void _fetchImages() {
+    setState(() {
+      _futureImages = fetchDeviceDisplay(widget.deviceId);
+    });
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _fetchImages();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   void _toggleImageVisibility() {
@@ -32,7 +68,6 @@ class _DisplayDeviceState extends State<DisplayDevice> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Images'),
         actions: [
           MouseRegion(
             onEnter: (_) {

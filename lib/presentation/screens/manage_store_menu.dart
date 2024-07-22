@@ -74,7 +74,7 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Store menu deleted successfully')),
+          const SnackBar(content: Text('Deleted successfully')),
         );
       }
     }
@@ -102,8 +102,9 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
               itemBuilder: (context, index) {
                 final storeMenu = storeMenus[index];
                 return ListTile(
-                  title: Text('Menu ID: ${storeMenu.menuId}'),
-                  subtitle: Text('Store ID: ${storeMenu.storeId}'),
+                  title: Text(' ${storeMenu.menu?.menuName}'),
+                  subtitle:
+                      Text('Description: ${storeMenu.menu?.menuDescription}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

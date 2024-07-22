@@ -108,7 +108,14 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
               itemBuilder: (context, index) {
                 final storeCollection = storeCollections[index];
                 return ListTile(
-                  title: Text('Collection ID: ${storeCollection.collectionId}'),
+                  title: Text('${storeCollection.collection?.collectionName}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Description: ${storeCollection.collection?.collectionDescription}'),
+                    ],
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

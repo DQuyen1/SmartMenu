@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_menu/models/store_menu.dart';
+import 'package:smart_menu/models/menu.dart' as menu_model;
+import 'package:smart_menu/models/store_menu.dart' as store_menu_model;
+import 'package:smart_menu/repository/menu_repository.dart';
 import 'package:smart_menu/repository/store_menu_repository.dart';
 
 class StoreMenuFormScreen extends StatefulWidget {
-  final StoreMenu? storeMenu;
+  final store_menu_model.StoreMenu? storeMenu;
   final int storeId;
 
   const StoreMenuFormScreen({Key? key, this.storeMenu, required this.storeId})
@@ -18,18 +20,23 @@ class _StoreMenuFormScreenState extends State<StoreMenuFormScreen> {
   final StoreMenuRepository _storeMenuRepository = StoreMenuRepository();
 
   late TextEditingController _menuIdController;
+  List<menu_model.Menu>? _menuList;
 
   @override
   void initState() {
     super.initState();
     _menuIdController =
         TextEditingController(text: widget.storeMenu?.menuId.toString() ?? '');
+
+    _fetchMenus();
   }
 
-  @override
-  void dispose() {
-    _menuIdController.dispose();
-    super.dispose();
+  Future<void> _fetchMenus() async {
+    try {
+      final menuRepository = MenuRepository();
+      _menuList = await menuRepository.getAll(widget.storeId);
+      setState(() {});
+    } catch (e) {}
   }
 
   void _saveStoreMenu() async {
@@ -70,13 +77,23 @@ class _StoreMenuFormScreenState extends State<StoreMenuFormScreen> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _menuIdController,
-                decoration: const InputDecoration(labelText: 'Menu ID'),
-                keyboardType: TextInputType.number,
+              DropdownButtonFormField<int>(
+                value: widget.storeMenu?.menuId,
+                hint: const Text('Select Menu'),
+                items: _menuList?.map((menu) {
+                  return DropdownMenuItem<int>(
+                    value: menu.menuId,
+                    child: Text(menu.menuName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _menuIdController.text = value.toString();
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter menu ID';
+                  if (value == null) {
+                    return 'Please select a menu';
                   }
                   return null;
                 },

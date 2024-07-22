@@ -120,9 +120,17 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
               itemBuilder: (context, index) {
                 final storeProduct = storeProducts[index];
                 return ListTile(
-                  title: Text('Product ID: ${storeProduct.productId}'),
-                  subtitle: Text(
-                      'Store ID: ${storeProduct.storeId}\nAvailable: ${storeProduct.isAvailable}'),
+                  title:
+                      Text('${storeProduct.product?.productName ?? 'Unknown'}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Description: ${storeProduct.product?.productDescription ?? 'No description'}'),
+                      Text(
+                          'Available: ${storeProduct.isAvailable ? 'On' : 'Off'}'),
+                    ],
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
