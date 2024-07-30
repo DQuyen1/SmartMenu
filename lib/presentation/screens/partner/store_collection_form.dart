@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_menu/models/store_collection.dart';
+import 'package:smart_menu/models/store_collection.dart'
+    as store_collection_model;
 import 'package:smart_menu/repository/store_collection_repository.dart';
+import 'package:smart_menu/models/collection.dart' as collection_model;
+import 'package:smart_menu/repository/collection_repository.dart';
 
 class StoreCollectionFormScreen extends StatefulWidget {
-  final StoreCollection? storeCollection;
+  final store_collection_model.StoreCollection? storeCollection;
   final int storeId;
 
   const StoreCollectionFormScreen(
@@ -19,14 +22,23 @@ class _StoreCollectionFormScreenState extends State<StoreCollectionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final StoreCollectionRepository _storeCollectionRepository =
       StoreCollectionRepository();
-
   late TextEditingController _collectionIdController;
+  List<collection_model.Collection>? _collectionList;
 
   @override
   void initState() {
     super.initState();
     _collectionIdController = TextEditingController(
         text: widget.storeCollection?.collectionId.toString() ?? '');
+    _fetchCollection();
+  }
+
+  Future<void> _fetchCollection() async {
+    try {
+      final collectionRepository = CollectionRepository();
+      _collectionList = await collectionRepository.getAll(widget.storeId);
+      setState(() {});
+    } catch (e) {}
   }
 
   @override
@@ -75,13 +87,23 @@ class _StoreCollectionFormScreenState extends State<StoreCollectionFormScreen> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _collectionIdController,
-                decoration: const InputDecoration(labelText: 'Collection ID'),
-                keyboardType: TextInputType.number,
+              DropdownButtonFormField<int>(
+                value: widget.storeCollection?.collectionId,
+                hint: const Text('Select Collection'),
+                items: _collectionList?.map((collection) {
+                  return DropdownMenuItem<int>(
+                    value: collection.collectionId,
+                    child: Text(collection.collectionName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _collectionIdController.text = value.toString();
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter collection ID';
+                  if (value == null) {
+                    return 'Please select a collection';
                   }
                   return null;
                 },
