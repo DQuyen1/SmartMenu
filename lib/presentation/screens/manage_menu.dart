@@ -68,13 +68,13 @@ class _MenuListScreenState extends State<MenuListScreen> {
     if (confirmed == true) {
       final success = await _menuRepository.deleteMenu(menuId);
       if (success) {
-        _fetchMenus(); // Refresh the menu list
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Menu deleted successfully')),
+          const SnackBar(content: Text('Failed to delete')),
         );
       } else {
+        _fetchMenus();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete menu')),
+          const SnackBar(content: Text('Menu deleted successfully')),
         );
       }
     }
