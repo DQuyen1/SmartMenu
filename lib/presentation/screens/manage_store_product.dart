@@ -51,17 +51,19 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Store Product'),
+        title: const Text('Delete Store Product',
+            style: TextStyle(
+                color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
         content:
             const Text('Are you sure you want to delete this store product?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -71,13 +73,17 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
       final success = await _repository.deleteStoreProduct(storeProductId);
       _fetchStoreProduct();
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete product')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Failed to delete product')),
+        // );
+
+        _showSnackBar('Failed to delete product', Colors.red);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Store menu deleted successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Store menu deleted successfully')),
+        // );
+
+        _showSnackBar('Store menu deleted successfully', Colors.green);
       }
     }
   }
@@ -92,17 +98,52 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
         storeProduct.isAvailable = !storeProduct.isAvailable;
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update product availability')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Failed to update product availability')),
+      // );
+
+      _showSnackBar('Failed to update product availability', Colors.red);
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Store Products'),
+        title: const Text('Store Products',
+            style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20)),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<StoreProduct>>(
         future: _futureStoreProducts,
@@ -115,45 +156,67 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
             return const Center(child: Text('No store product found'));
           } else {
             final storeProducts = snapshot.data!;
-            return ListView.builder(
+            return GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1, // Number of columns in the grid
+                childAspectRatio: 3 / 1, // Aspect ratio for the items
+              ),
               itemCount: storeProducts.length,
               itemBuilder: (context, index) {
                 final storeProduct = storeProducts[index];
-                return ListTile(
-                  title:
-                      Text('${storeProduct.product?.productName ?? 'Unknown'}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          'Description: ${storeProduct.product?.productDescription ?? 'No description'}'),
-                      Text(
-                          'Available: ${storeProduct.isAvailable ? 'On' : 'Off'}'),
-                    ],
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          storeProduct.isAvailable
-                              ? Icons.toggle_on
-                              : Icons.toggle_off,
-                          color: storeProduct.isAvailable
-                              ? Colors.green
-                              : Colors.red,
+                      ListTile(
+                        title: Text(
+                            '${storeProduct.product?.productName ?? 'Unknown'}',
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'Description: ${storeProduct.product?.productDescription ?? 'No description'}',
+                                style: const TextStyle(
+                                    fontSize: 16, color: Colors.grey)),
+                            // Text(
+                            //     'Available: ${storeProduct.isAvailable ? 'On' : 'Off'}'),
+                          ],
                         ),
-                        onPressed: () => _toggleAvailability(storeProduct),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _navigateToStoreProductForm(
-                            storeProduct: storeProduct),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () =>
-                            _deleteStoreProduct(storeProduct.storeProductId),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              storeProduct.isAvailable
+                                  ? Icons.toggle_on
+                                  : Icons.toggle_off,
+                              color: storeProduct.isAvailable
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                            iconSize: 32,
+                            onPressed: () => _toggleAvailability(storeProduct),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _navigateToStoreProductForm(
+                                storeProduct: storeProduct),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteStoreProduct(
+                                storeProduct.storeProductId),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -165,7 +228,8 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToStoreProductForm(),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

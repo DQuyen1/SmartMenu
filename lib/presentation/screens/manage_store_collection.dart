@@ -54,17 +54,19 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Store Collection'),
+        title: const Text('Delete Store Collection',
+            style: TextStyle(
+                color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
         content: const Text(
             'Are you sure you want to delete this store collection?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -75,22 +77,57 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
           .deleteStoreCollection(storeCollectionId);
       _fetchStoreCollections();
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete store collection')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Failed to delete store collection')),
+        // );
+        _showSnackBar('Failed to delete store collection', Colors.red);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Deleted successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Deleted successfully')),
+        // );
+        _showSnackBar('Deleted successfully', Colors.green);
       }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Store Collections'),
+        title: const Text('Store Collections',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<StoreCollection>>(
         future: _futureStoreCollections,
@@ -103,31 +140,48 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
             return const Center(child: Text('No store collections found'));
           } else {
             final storeCollections = snapshot.data!;
-            return ListView.builder(
+            return GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1, // Number of columns in the grid
+                childAspectRatio: 3 / 1, // Aspect ratio for the items
+              ),
               itemCount: storeCollections.length,
               itemBuilder: (context, index) {
                 final storeCollection = storeCollections[index];
-                return ListTile(
-                  title: Text('${storeCollection.collection?.collectionName}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          'Description: ${storeCollection.collection?.collectionDescription}'),
-                    ],
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _navigateToStoreCollectionForm(
-                            storeCollection: storeCollection),
+                      ListTile(
+                        title: Text(
+                            '${storeCollection.collection?.collectionName}',
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                            'Description: ${storeCollection.collection?.collectionDescription}',
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.grey)),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _deleteStoreCollection(
-                            storeCollection.storeCollectionId),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _navigateToStoreCollectionForm(
+                                storeCollection: storeCollection),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteStoreCollection(
+                                storeCollection.storeCollectionId),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -139,7 +193,8 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToStoreCollectionForm(),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

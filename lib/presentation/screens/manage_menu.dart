@@ -50,16 +50,29 @@ class _MenuListScreenState extends State<MenuListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Menu'),
+        title: const Text(
+          'Delete Menu',
+          style: TextStyle(
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
         content: const Text('Are you sure you want to delete this menu?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -67,6 +80,7 @@ class _MenuListScreenState extends State<MenuListScreen> {
 
     if (confirmed == true) {
       final success = await _menuRepository.deleteMenu(menuId);
+      _fetchMenus(); // Refresh the menu list
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to delete')),
@@ -84,7 +98,15 @@ class _MenuListScreenState extends State<MenuListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menus'),
+        title: const Text(
+          'Menus',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<Menu>>(
         future: _futureMenus,
@@ -97,23 +119,52 @@ class _MenuListScreenState extends State<MenuListScreen> {
             return const Center(child: Text('No menus found'));
           } else {
             final menus = snapshot.data!;
-            return ListView.builder(
+            return GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1, // Number of columns in the grid
+                childAspectRatio: 3 / 1, // Aspect ratio for the items
+              ),
               itemCount: menus.length,
               itemBuilder: (context, index) {
                 final menu = menus[index];
-                return ListTile(
-                  title: Text(menu.menuName),
-                  subtitle: Text(menu.menuDescription),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _navigateToMenuForm(menu: menu),
+                      ListTile(
+                        title: Text(
+                          menu.menuName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          menu.menuDescription,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _deleteMenu(menu.menuId),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _navigateToMenuForm(menu: menu),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteMenu(menu.menuId),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -125,7 +176,8 @@ class _MenuListScreenState extends State<MenuListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToMenuForm(),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
