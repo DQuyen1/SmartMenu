@@ -50,16 +50,18 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Store Menu'),
+        title: const Text('Delete Store Menu',
+            style: TextStyle(
+                color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
         content: const Text('Are you sure you want to delete this store menu?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -69,22 +71,51 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
       final success = await _storeMenuRepository.deleteStoreMenu(storeMenuId);
       _fetchStoreMenus();
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete menu')),
-        );
+        _showSnackBar('Menu deleted successfully', Colors.green);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Deleted successfully')),
-        );
+        _showSnackBar('Failed to delete menu', Colors.red);
       }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Store Menus'),
+        title: const Text('Store Menus',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<StoreMenu>>(
         future: _futureStoreMenus,
@@ -97,26 +128,47 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
             return const Center(child: Text('No store menus found'));
           } else {
             final storeMenus = snapshot.data!;
-            return ListView.builder(
+            return GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1, // Number of columns in the grid
+                childAspectRatio: 3 / 1, // Aspect ratio for the items
+              ),
               itemCount: storeMenus.length,
               itemBuilder: (context, index) {
                 final storeMenu = storeMenus[index];
-                return ListTile(
-                  title: Text(' ${storeMenu.menu?.menuName}'),
-                  subtitle:
-                      Text('Description: ${storeMenu.menu?.menuDescription}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () =>
-                            _navigateToStoreMenuForm(storeMenu: storeMenu),
+                      ListTile(
+                        title: Text('${storeMenu.menu?.menuName}',
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                            'Description: ${storeMenu.menu?.menuDescription}',
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.grey)),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () =>
-                            _deleteStoreMenu(storeMenu.storeMenuId),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () =>
+                                _navigateToStoreMenuForm(storeMenu: storeMenu),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () =>
+                                _deleteStoreMenu(storeMenu.storeMenuId),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -128,7 +180,8 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToStoreMenuForm(),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

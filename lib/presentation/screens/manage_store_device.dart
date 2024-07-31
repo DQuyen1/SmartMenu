@@ -72,79 +72,143 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
       final success =
           await _storeDeviceRepository.deleteStoreDevice(storeDeviceId);
       _fetchStoreDevices();
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete store device')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Store device deleted successfully')),
-        );
-      }
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(success
+      //         ? 'Store device deleted successfully'
+      //         : 'Failed to delete store device'),
+      //     backgroundColor: success ? Colors.green : Colors.red,
+      //   ),
+      // );
+      _showSnackBar(
+          success
+              ? 'Store device deleted successfully'
+              : 'Failed to delete store device',
+          success ? Colors.green : Colors.red);
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Store Devices'),
+        title: const Text('Store Devices',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
-      body: FutureBuilder<List<StoreDevice>>(
-        future: _futureStoreDevices,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('No store devices found'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No store devices found'));
-          } else {
-            final storeDevices = snapshot.data!;
-            return ListView.builder(
-              itemCount: storeDevices.length,
-              itemBuilder: (context, index) {
-                final storeDevice = storeDevices[index];
-                return ListTile(
-                  title: Text(storeDevice.storeDeviceName),
-                  subtitle: Text(
-                      'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _navigateToStoreDeviceForm(
-                            storeDevice: storeDevice),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () =>
-                            _deleteStoreDevice(storeDevice.storeDeviceId),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DisplayDevice(
-                                  deviceId: storeDevice.storeDeviceId),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: FutureBuilder<List<StoreDevice>>(
+          future: _futureStoreDevices,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No store devices found'));
+            } else {
+              final storeDevices = snapshot.data!;
+              return ListView.builder(
+                itemCount: storeDevices.length,
+                itemBuilder: (context, index) {
+                  final storeDevice = storeDevices[index];
+                  return Card(
+                    elevation: 4.0,
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ListTile(
+                          title: Text(
+                            storeDevice.storeDeviceName,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          subtitle: Text(
+                              'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _navigateToStoreDeviceForm(
+                                  storeDevice: storeDevice),
                             ),
-                          );
-                        },
-                        child: const Text('Display'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }
-        },
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () =>
+                                  _deleteStoreDevice(storeDevice.storeDeviceId),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DisplayDevice(
+                                        deviceId: storeDevice.storeDeviceId),
+                                  ),
+                                );
+                              },
+                              child: const Text('Display',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToStoreDeviceForm(),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

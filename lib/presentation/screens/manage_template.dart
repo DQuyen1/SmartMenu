@@ -37,7 +37,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List Of Templates'),
+        title: const Text('List Of Templates',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<Template>>(
         future: templates,
@@ -50,20 +55,41 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             return Center(child: Text('No templates found'));
           } else {
             final templates = snapshot.data!;
-            return ListView.builder(
+            return GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                childAspectRatio: 3 / 1,
+              ),
               itemCount: templates.length,
               itemBuilder: (context, index) {
                 final template = templates[index];
-                return ListTile(
-                  title: Text(template.templateName),
-                  subtitle: Text(template.templateDescription),
-                  leading: Image.network(
-                    template.templateImgPath,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  onTap: () {},
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ListTile(
+                        title: Text(template.templateName,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        subtitle: Text(template.templateDescription,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.grey)),
+                        leading: Image.network(
+                          template.templateImgPath,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        ),
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
                 );
               },
             );

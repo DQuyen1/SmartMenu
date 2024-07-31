@@ -54,20 +54,56 @@ class _StoreCollectionFormScreenState extends State<StoreCollectionFormScreen> {
       if (success) {
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save store collection')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Failed to save store collection')),
+        // );
+
+        _showSnackBar('Failed to save store collection', Colors.red);
       }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.storeCollection == null
-            ? 'Create Store Collection'
-            : 'Edit Store Collection'),
+        title: Text(
+            widget.storeCollection == null
+                ? 'Create Store Collection'
+                : 'Edit Store Collection',
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -77,7 +113,21 @@ class _StoreCollectionFormScreenState extends State<StoreCollectionFormScreen> {
             children: [
               TextFormField(
                 controller: _collectionIdController,
-                decoration: const InputDecoration(labelText: 'Collection ID'),
+                decoration: InputDecoration(
+                  labelText: 'Collection ID',
+                  labelStyle: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[800],
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  filled: true,
+                  focusedBorder: InputBorder.none,
+                  fillColor: Colors.grey[200],
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -87,9 +137,27 @@ class _StoreCollectionFormScreenState extends State<StoreCollectionFormScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveStoreCollection,
-                child: const Text('Save'),
+              Center(
+                child: SizedBox(
+                  width: double.infinity, // Make button full width
+                  child: ElevatedButton(
+                    onPressed: _saveStoreCollection,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
