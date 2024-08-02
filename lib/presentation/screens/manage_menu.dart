@@ -82,16 +82,46 @@ class _MenuListScreenState extends State<MenuListScreen> {
       final success = await _menuRepository.deleteMenu(menuId);
       _fetchMenus(); // Refresh the menu list
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Menu deleted successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Menu deleted successfully')),
+        // );
+        _showSnackBar('Failed to delete', Colors.red);
       } else {
         _fetchMenus();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Failed to delete')),
+        // );
+        _showSnackBar('Menu deleted successfully', Colors.green);
       }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
   }
 
   @override
