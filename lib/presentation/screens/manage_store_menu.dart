@@ -109,13 +109,26 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Store Menus',
-            style: TextStyle(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Store Menus',
+              style: TextStyle(
                 color: Colors.black,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
-                fontWeight: FontWeight.bold)),
-        centerTitle: true,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.orange.shade100,
+          ),
+        ),
       ),
       body: FutureBuilder<List<StoreMenu>>(
         future: _futureStoreMenus,
@@ -147,6 +160,8 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.store,
+                            size: 40, color: Colors.orange),
                         title: Text('${storeMenu.menu?.menuName}',
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),

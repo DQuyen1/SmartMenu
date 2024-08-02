@@ -137,13 +137,26 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Store Products',
-            style: TextStyle(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Store Products',
+              style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: 20)),
-        centerTitle: true,
+                fontSize: 20,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.teal,
+          ),
+        ),
       ),
       body: FutureBuilder<List<StoreProduct>>(
         future: _futureStoreProducts,
@@ -175,6 +188,8 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.shopping_bag,
+                            color: Colors.teal, size: 40),
                         title: Text(
                             '${storeProduct.product?.productName ?? 'Unknown'}',
                             style: const TextStyle(

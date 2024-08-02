@@ -121,13 +121,26 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Store Collections',
-            style: TextStyle(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Store Collections',
+              style: TextStyle(
                 color: Colors.black,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
-                fontWeight: FontWeight.bold)),
-        centerTitle: true,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.purple.shade100,
+          ),
+        ),
       ),
       body: FutureBuilder<List<StoreCollection>>(
         future: _futureStoreCollections,
@@ -159,6 +172,8 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.collections,
+                            color: Colors.purple, size: 40),
                         title: Text(
                             '${storeCollection.collection?.collectionName}',
                             style: const TextStyle(

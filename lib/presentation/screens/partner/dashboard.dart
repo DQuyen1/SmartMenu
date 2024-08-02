@@ -22,9 +22,26 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: const Color(0xFF1976D2), // Example app bar color
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Dashboard',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.blue.shade100,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -65,81 +82,94 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Section 4: Manage Buttons
-              Wrap(
-                spacing: 10.0,
-                runSpacing: 10.0,
+              const Text(
+                "Manage Options",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 10.0,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              MenuListScreen(brandId: brandId),
-                        ),
-                      );
-                    },
-                    child: const Text('Manage Menu'),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Menu",
+                    Icons.menu_book,
+                    Colors.blue,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MenuListScreen(brandId: brandId),
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              TemplateListScreen(brandId: brandId),
-                        ),
-                      );
-                    },
-                    child: const Text('Manage Template'),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Template",
+                    Icons.description,
+                    Colors.green,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TemplateListScreen(brandId: brandId),
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              StoreMenuListScreen(storeId: storeId),
-                        ),
-                      );
-                    },
-                    child: const Text('Manage Store Menu'),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Store Menu",
+                    Icons.store,
+                    Colors.orange,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            StoreMenuListScreen(storeId: storeId),
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              StoreDeviceListScreen(storeId: storeId),
-                        ),
-                      );
-                    },
-                    child: const Text('Manage Store Device'),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Store Device",
+                    Icons.devices,
+                    Colors.red,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            StoreDeviceListScreen(storeId: storeId),
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              StoreCollectionListScreen(storeId: storeId),
-                        ),
-                      );
-                    },
-                    child: const Text('Manage Store Collection'),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Store Collection",
+                    Icons.collections,
+                    Colors.purple,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            StoreCollectionListScreen(storeId: storeId),
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              StoreProductListScreen(storeId: storeId),
-                        ),
-                      );
-                    },
-                    child: const Text('Manage Store Product'),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Store Product",
+                    Icons.shopping_bag,
+                    Colors.teal,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            StoreProductListScreen(storeId: storeId),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -260,6 +290,47 @@ class DashboardScreen extends StatelessWidget {
       trailing: Text(
         DateFormat('MMM d, h:mm a').format(DateTime.now()),
         style: const TextStyle(fontSize: 12, color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildManageButtonCard(BuildContext context, String title,
+      IconData icon, Color color, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              colors: [
+                color.withOpacity(0.8),
+                color.withOpacity(0.4),
+              ], // Gradient example
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 48, color: Colors.white),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

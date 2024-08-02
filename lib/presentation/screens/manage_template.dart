@@ -36,13 +36,26 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('List Of Templates',
-            style: TextStyle(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'List of Templates',
+              style: TextStyle(
                 color: Colors.black,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
-                fontWeight: FontWeight.bold)),
-        centerTitle: true,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.green[100],
+          ),
+        ),
       ),
       body: FutureBuilder<List<Template>>(
         future: templates,

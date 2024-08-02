@@ -83,12 +83,12 @@ class _MenuListScreenState extends State<MenuListScreen> {
       _fetchMenus(); // Refresh the menu list
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete')),
+          const SnackBar(content: Text('Menu deleted successfully')),
         );
       } else {
         _fetchMenus();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Menu deleted successfully')),
+          const SnackBar(content: Text('Failed to delete')),
         );
       }
     }
@@ -97,16 +97,26 @@ class _MenuListScreenState extends State<MenuListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Menus',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Menus',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.blue.shade100,
           ),
         ),
-        centerTitle: true,
       ),
       body: FutureBuilder<List<Menu>>(
         future: _futureMenus,
@@ -119,57 +129,82 @@ class _MenuListScreenState extends State<MenuListScreen> {
             return const Center(child: Text('No menus found'));
           } else {
             final menus = snapshot.data!;
-            return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, // Number of columns in the grid
-                childAspectRatio: 3 / 1, // Aspect ratio for the items
-              ),
-              itemCount: menus.length,
-              itemBuilder: (context, index) {
-                final menu = menus[index];
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ListTile(
-                        title: Text(
-                          menu.menuName,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+            return Column(
+              children: [
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1, // Number of columns in the grid
+                      childAspectRatio: 3 / 1, // Aspect ratio for the items
+                    ),
+                    itemCount: menus.length,
+                    itemBuilder: (context, index) {
+                      final menu = menus[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
+                        elevation: 6,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        subtitle: Text(
-                          menu.menuDescription,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(
+                                    Icons.restaurant_menu, // Icon minh họa
+                                    color: Colors.blue,
+                                    size: 40,
+                                  ),
+                                  title: Text(
+                                    menu.menuName,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    menu.menuDescription,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Colors.blue),
+                                      onPressed: () =>
+                                          _navigateToMenuForm(menu: menu),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteMenu(menu.menuId),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _navigateToMenuForm(menu: menu),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _deleteMenu(menu.menuId),
-                          ),
-                        ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             );
           }
         },
