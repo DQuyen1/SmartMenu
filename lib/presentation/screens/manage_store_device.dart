@@ -119,91 +119,104 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Store Devices',
-            style: TextStyle(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Store Devices',
+              style: TextStyle(
                 color: Colors.black,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
-                fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<List<StoreDevice>>(
-          future: _futureStoreDevices,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No store devices found'));
-            } else {
-              final storeDevices = snapshot.data!;
-              return ListView.builder(
-                itemCount: storeDevices.length,
-                itemBuilder: (context, index) {
-                  final storeDevice = storeDevices[index];
-                  return Card(
-                    elevation: 4.0,
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ListTile(
-                          title: Text(
-                            storeDevice.storeDeviceName,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          subtitle: Text(
-                              'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () => _navigateToStoreDeviceForm(
-                                  storeDevice: storeDevice),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () =>
-                                  _deleteStoreDevice(storeDevice.storeDeviceId),
-                            ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DisplayDevice(
-                                        deviceId: storeDevice.storeDeviceId),
-                                  ),
-                                );
-                              },
-                              child: const Text('Display',
-                                  style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }
-          },
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.red.shade100,
+          ),
         ),
+      ),
+      body: FutureBuilder<List<StoreDevice>>(
+        future: _futureStoreDevices,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No store devices found'));
+          } else {
+            final storeDevices = snapshot.data!;
+            return ListView.builder(
+              itemCount: storeDevices.length,
+              itemBuilder: (context, index) {
+                final storeDevice = storeDevices[index];
+                return Card(
+                  elevation: 4.0,
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.devices,
+                            size: 40, color: Colors.red),
+                        title: Text(
+                          storeDevice.storeDeviceName,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        subtitle: Text(
+                            'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _navigateToStoreDeviceForm(
+                                storeDevice: storeDevice),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () =>
+                                _deleteStoreDevice(storeDevice.storeDeviceId),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DisplayDevice(
+                                      deviceId: storeDevice.storeDeviceId),
+                                ),
+                              );
+                            },
+                            child: const Text('Display',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToStoreDeviceForm(),
