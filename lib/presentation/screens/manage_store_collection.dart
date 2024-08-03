@@ -172,8 +172,18 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.collections,
-                            color: Colors.purple, size: 40),
+                        leading: storeCollection
+                                    .collection?.collectionBackgroundImgPath !=
+                                null
+                            ? Image.network(
+                                storeCollection
+                                    .collection!.collectionBackgroundImgPath!,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(Icons.collections,
+                                color: Colors.purple, size: 40),
                         title: Text(
                             '${storeCollection.collection?.collectionName}',
                             style: const TextStyle(

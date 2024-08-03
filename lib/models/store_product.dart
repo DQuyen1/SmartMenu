@@ -39,6 +39,8 @@ class Product {
   final int categoryId;
   final String productName;
   final String productDescription;
+  final String? productImgPath;
+  final String? productLogoPath;
   final List<ProductSizePrice> productSizePrices;
   final bool isDeleted;
 
@@ -47,6 +49,8 @@ class Product {
     required this.categoryId,
     required this.productName,
     required this.productDescription,
+    required this.productImgPath,
+    required this.productLogoPath,
     required this.productSizePrices,
     required this.isDeleted,
   });
@@ -61,6 +65,8 @@ class Product {
       categoryId: json['categoryId'],
       productName: json['productName'],
       productDescription: json['productDescription'],
+      productImgPath: json['productImgPath'],
+      productLogoPath: json['productLogoPath'],
       productSizePrices: productSizePricesList,
       isDeleted: json['isDeleted'],
     );

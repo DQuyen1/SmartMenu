@@ -72,19 +72,9 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
       final success =
           await _storeDeviceRepository.deleteStoreDevice(storeDeviceId);
       _fetchStoreDevices();
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(success
-      //         ? 'Store device deleted successfully'
-      //         : 'Failed to delete store device'),
-      //     backgroundColor: success ? Colors.green : Colors.red,
-      //   ),
-      // );
       _showSnackBar(
-          success
-              ? 'Store device deleted successfully'
-              : 'Failed to delete store device',
-          success ? Colors.green : Colors.red);
+          success ? 'Failed to delete' : 'Store device deleted successfully',
+          success ? Colors.red : Colors.green);
     }
   }
 
