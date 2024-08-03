@@ -41,7 +41,7 @@ class Collection {
   final int brandId;
   final String collectionName;
   final String collectionDescription;
-  final dynamic productGroups; // Use dynamic if the type is not specified
+  final String? collectionBackgroundImgPath;
   final bool isDeleted;
 
   Collection({
@@ -49,7 +49,7 @@ class Collection {
     required this.brandId,
     required this.collectionName,
     required this.collectionDescription,
-    this.productGroups,
+    required this.collectionBackgroundImgPath,
     required this.isDeleted,
   });
 
@@ -59,7 +59,7 @@ class Collection {
       brandId: json['brandId'],
       collectionName: json['collectionName'],
       collectionDescription: json['collectionDescription'],
-      productGroups: json['productGroups'], // Adjust type if necessary
+      collectionBackgroundImgPath: json['collectionBackgroundImgPath'],
       isDeleted: json['isDeleted'],
     );
   }
@@ -70,7 +70,7 @@ class Collection {
       'brandId': brandId,
       'collectionName': collectionName,
       'collectionDescription': collectionDescription,
-      'productGroups': productGroups, // Adjust type if necessary
+      'collectionBackgroundImgPath': collectionBackgroundImgPath,
       'isDeleted': isDeleted,
     };
   }
