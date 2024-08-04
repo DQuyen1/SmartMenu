@@ -4,7 +4,6 @@ class Collection {
   final String collectionName;
   final String collectionDescription;
   final String? collectionBackgroundImgPath;
-  final List<dynamic>? productGroups;
   final bool isDeleted;
 
   Collection({
@@ -13,7 +12,6 @@ class Collection {
     required this.collectionName,
     required this.collectionDescription,
     this.collectionBackgroundImgPath,
-    this.productGroups,
     required this.isDeleted,
   });
 
@@ -24,7 +22,6 @@ class Collection {
       collectionName: json['collectionName'],
       collectionDescription: json['collectionDescription'],
       collectionBackgroundImgPath: json['collectionBackgroundImgPath'],
-      productGroups: json['productGroups'],
       isDeleted: json['isDeleted'],
     );
   }
@@ -36,7 +33,6 @@ class Collection {
       'collectionName': collectionName,
       'collectionDescription': collectionDescription,
       'collectionBackgroundImgPath': collectionBackgroundImgPath,
-      'productGroups': productGroups,
       'isDeleted': isDeleted,
     };
   }

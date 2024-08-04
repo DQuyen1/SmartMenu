@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/store_product.dart';
+import 'package:smart_menu/models/category.dart';
 import 'package:smart_menu/repository/store_product_repository.dart';
+import 'package:smart_menu/repository/category_repository.dart';
 
 class StoreProductFormScreen extends StatefulWidget {
   final StoreProduct? storeProduct;
@@ -17,12 +19,24 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final StoreProductRepository _repository = StoreProductRepository();
   late TextEditingController _productIdController;
+  List<Category>? _cateList;
 
   @override
   void initState() {
     super.initState();
     _productIdController = TextEditingController(
         text: widget.storeProduct?.categoryId.toString() ?? '');
+    _fetchCategory();
+  }
+
+  Future<void> _fetchCategory() async {
+    try {
+      final cateRepository = CategoryRepository();
+      _cateList = await cateRepository.getAll(widget.storeId);
+      setState(() {});
+    } catch (e) {
+      _showSnackBar('Failed to fetch menus: $e', Colors.red);
+    }
   }
 
   @override
@@ -106,10 +120,22 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _productIdController,
+              DropdownButtonFormField<int>(
+                value: widget.storeProduct?.categoryId,
+                hint: const Text('Select Menu'),
+                items: _cateList?.map((category) {
+                  return DropdownMenuItem<int>(
+                    value: category.categoryId,
+                    child: Text(category.categoryName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _productIdController.text = value.toString();
+                  });
+                },
                 decoration: InputDecoration(
-                  labelText: 'Category Id',
+                  labelText: 'Menu',
                   labelStyle: TextStyle(
                     fontSize: 18,
                     color: Colors.grey[800],
@@ -118,15 +144,13 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   filled: true,
-                  focusedBorder: InputBorder.none,
                   fillColor: Colors.grey[200],
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 ),
-                keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter category Id';
+                  if (value == null) {
+                    return 'Please select a menu';
                   }
                   return null;
                 },
@@ -134,7 +158,7 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
               const SizedBox(height: 20),
               Center(
                 child: SizedBox(
-                  width: double.infinity, // Make button full width
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _saveForm,
                     style: ElevatedButton.styleFrom(

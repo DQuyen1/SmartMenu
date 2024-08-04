@@ -188,23 +188,22 @@ class _StoreProductListScreenState extends State<StoreProductListScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.shopping_bag,
-                            color: Colors.teal, size: 40),
-                        title: Text(
-                            '${storeProduct.product?.productName ?? 'Unknown'}',
+                        leading: storeProduct.product?.productImgPath != null
+                            ? Image.network(
+                                storeProduct.product!.productImgPath!,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(Icons.collections,
+                                color: Colors.purple, size: 40),
+                        title: Text('${storeProduct.product?.productName}',
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                'Description: ${storeProduct.product?.productDescription ?? 'No description'}',
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.grey)),
-                            // Text(
-                            //     'Available: ${storeProduct.isAvailable ? 'On' : 'Off'}'),
-                          ],
-                        ),
+                        subtitle: Text(
+                            'Description: ${storeProduct.product?.productDescription}',
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.grey)),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,

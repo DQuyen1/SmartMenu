@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/store_device.dart';
 import 'package:smart_menu/presentation/screens/display_device.dart';
-import 'package:smart_menu/presentation/screens/partner/display_device_form.dart';
 import 'package:smart_menu/repository/store_device_repository.dart';
 import 'package:smart_menu/presentation/screens/partner/store_device_form.dart';
 
@@ -85,18 +84,8 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
       final success =
           await _storeDeviceRepository.deleteStoreDevice(storeDeviceId);
       _fetchStoreDevices();
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(success
-      //         ? 'Store device deleted successfully'
-      //         : 'Failed to delete store device'),
-      //     backgroundColor: success ? Colors.green : Colors.red,
-      //   ),
-      // );
       _showSnackBar(
-          success
-              ? 'Failed to delete store device'
-              : 'Store device deleted successfully',
+          success ? 'Failed to delete' : 'Store device deleted successfully',
           success ? Colors.red : Colors.green);
     }
   }

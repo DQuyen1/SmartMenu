@@ -69,10 +69,11 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
 
     if (confirmed == true) {
       final success = await _storeMenuRepository.deleteStoreMenu(storeMenuId);
-      _fetchStoreMenus();
+
       if (success) {
-        _showSnackBar('Failed to delete menu', Colors.red);
+        _showSnackBar('Failed', Colors.red);
       } else {
+        _fetchStoreMenus();
         _showSnackBar('Menu deleted successfully', Colors.green);
       }
     }
@@ -143,8 +144,8 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
             final storeMenus = snapshot.data!;
             return GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, // Number of columns in the grid
-                childAspectRatio: 3 / 1, // Aspect ratio for the items
+                crossAxisCount: 1,
+                childAspectRatio: 3 / 1,
               ),
               itemCount: storeMenus.length,
               itemBuilder: (context, index) {
