@@ -71,9 +71,9 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
       final success = await _storeMenuRepository.deleteStoreMenu(storeMenuId);
       _fetchStoreMenus();
       if (success) {
-        _showSnackBar('Menu deleted successfully', Colors.green);
-      } else {
         _showSnackBar('Failed to delete menu', Colors.red);
+      } else {
+        _showSnackBar('Menu deleted successfully', Colors.green);
       }
     }
   }

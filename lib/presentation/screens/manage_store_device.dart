@@ -52,17 +52,30 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Store Device'),
+        title: const Text(
+          'Delete Store Device',
+          style: TextStyle(
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
         content:
             const Text('Are you sure you want to delete this store device?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -82,9 +95,9 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
       // );
       _showSnackBar(
           success
-              ? 'Store device deleted successfully'
-              : 'Failed to delete store device',
-          success ? Colors.green : Colors.red);
+              ? 'Failed to delete store device'
+              : 'Store device deleted successfully',
+          success ? Colors.red : Colors.green);
     }
   }
 
