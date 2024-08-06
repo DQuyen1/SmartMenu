@@ -41,7 +41,7 @@ class Menu {
   final int brandId;
   final String menuName;
   final String menuDescription;
-  final dynamic productGroups; // Use dynamic if the type is not specified
+  final dynamic productGroups;
   final bool isDeleted;
 
   Menu({
@@ -59,7 +59,7 @@ class Menu {
       brandId: json['brandId'],
       menuName: json['menuName'],
       menuDescription: json['menuDescription'],
-      productGroups: json['productGroups'], // Adjust type if necessary
+      productGroups: json['productGroups'],
       isDeleted: json['isDeleted'],
     );
   }
@@ -70,7 +70,7 @@ class Menu {
       'brandId': brandId,
       'menuName': menuName,
       'menuDescription': menuDescription,
-      'productGroups': productGroups, // Adjust type if necessary
+      'productGroups': productGroups,
       'isDeleted': isDeleted,
     };
   }

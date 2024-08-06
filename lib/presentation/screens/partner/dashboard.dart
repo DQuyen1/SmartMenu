@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:smart_menu/presentation/screens/manage_display.dart';
 import 'package:smart_menu/presentation/screens/manage_menu.dart';
 import 'package:smart_menu/presentation/screens/manage_store_collection.dart';
 import 'package:smart_menu/presentation/screens/manage_store_device.dart';
@@ -161,13 +162,28 @@ class DashboardScreen extends StatelessWidget {
                   _buildManageButtonCard(
                     context,
                     "Manage Store Product",
-                    Icons.shopping_bag,
+                    Icons.production_quantity_limits_sharp,
                     Colors.teal,
                     () => Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
                             StoreProductListScreen(storeId: storeId),
+                      ),
+                    ),
+                  ),
+                  _buildManageButtonCard(
+                    context,
+                    "Manage Display",
+                    Icons.display_settings,
+                    const Color.fromARGB(255, 147, 150, 0),
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DisplayListScreen(
+                          storeId: storeId,
+                          brandId: brandId,
+                        ),
                       ),
                     ),
                   ),
