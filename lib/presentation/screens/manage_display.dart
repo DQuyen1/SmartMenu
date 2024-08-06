@@ -1,0 +1,285 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:smart_menu/models/display.dart';
+import 'package:smart_menu/presentation/screens/partner/display_form.dart';
+import 'package:smart_menu/repository/display_repository.dart';
+
+class DisplayListScreen extends StatefulWidget {
+  final int storeId;
+  final int brandId;
+  const DisplayListScreen(
+      {super.key, required this.storeId, required this.brandId});
+
+  @override
+  _DisplayListScreenState createState() => _DisplayListScreenState();
+}
+
+class _DisplayListScreenState extends State<DisplayListScreen> {
+  late Future<List<Display>> _futureDisplays;
+  final DisplayRepository _repository = DisplayRepository();
+
+  void _fetchDisplay() {
+    setState(() {
+      _futureDisplays = _repository.getAll();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDisplay();
+    HttpOverrides.global = _DevHttpOverrides();
+  }
+
+  void _navigateToDisplayForm({Display? display}) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DisplayFormScreen(
+          display: display,
+          storeId: widget.storeId,
+          brandId: widget.brandId,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      _fetchDisplay();
+    }
+  }
+
+  void _deleteDisplay(int displayId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Display',
+            style: TextStyle(
+                color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
+        content: const Text('Are you sure you want to delete this display?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await _repository.deleteDisplay(displayId);
+      _fetchDisplay();
+      if (success) {
+        _showSnackBar('Display deleted successfully', Colors.green);
+      } else {
+        _showSnackBar('Failed to display', Colors.red);
+      }
+    }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {
+            // Dismiss the snackbar
+          },
+        ),
+      ),
+    );
+  }
+
+  String formatActiveHour(double activeHour) {
+    int totalSeconds = (activeHour * 3600).toInt();
+    int hours = totalSeconds ~/ 3600;
+    int minutes = (totalSeconds % 3600) ~/ 60;
+    int seconds = totalSeconds % 60;
+
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            title: const Text(
+              'Displays',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.teal,
+          ),
+        ),
+      ),
+      body: FutureBuilder<List<Display>>(
+        future: _futureDisplays,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No display found'));
+          } else {
+            final displays = snapshot.data!;
+            return ListView.builder(
+              itemCount: displays.length,
+              itemBuilder: (context, index) {
+                final display = displays[index];
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            if (display.displayImgPath != null &&
+                                Uri.tryParse(display.displayImgPath!)
+                                        ?.hasAbsolutePath ==
+                                    true)
+                              Image.network(
+                                display.displayImgPath!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              )
+                            else
+                              Container(
+                                width: 100,
+                                height: 100,
+                                color: Colors.grey.shade300,
+                                child: const Icon(
+                                  Icons.image,
+                                  color: Colors.grey,
+                                  size: 40,
+                                ),
+                              ),
+                            Expanded(
+                              child: ListTile(
+                                title: Text(
+                                  display.storeDeviceId.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (display.menuId != null)
+                                      Text(
+                                        display.menuId.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    if (display.collectionId != null)
+                                      Text(
+                                        display.collectionId.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    if (display.templateId != null)
+                                      Text(
+                                        display.templateId.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    if (display.activeHour != null)
+                                      Text(
+                                        formatActiveHour(display.activeHour!),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Colors.blue),
+                                      onPressed: () => _navigateToDisplayForm(
+                                          display: display),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () =>
+                                          _deleteDisplay(display.displayId),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToDisplayForm(),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class _DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}

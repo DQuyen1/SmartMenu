@@ -147,7 +147,7 @@ class _StoreCollectionFormScreenState extends State<StoreCollectionFormScreen> {
               const SizedBox(height: 20),
               Center(
                 child: SizedBox(
-                  width: double.infinity, // Make button full width
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _saveStoreCollection,
                     style: ElevatedButton.styleFrom(

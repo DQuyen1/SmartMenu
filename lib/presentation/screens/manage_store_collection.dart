@@ -162,55 +162,55 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
               itemBuilder: (context, index) {
                 final storeCollection = storeCollections[index];
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ListTile(
-                        leading: storeCollection
-                                    .collection?.collectionBackgroundImgPath !=
-                                null
-                            ? Image.network(
-                                storeCollection
-                                    .collection!.collectionBackgroundImgPath!,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                              )
-                            : const Icon(Icons.collections,
-                                color: Colors.purple, size: 40),
-                        title: Text(
-                            '${storeCollection.collection?.collectionName}',
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
-                        subtitle: Text(
-                            'Description: ${storeCollection.collection?.collectionDescription}',
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.grey)),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _navigateToStoreCollectionForm(
-                                storeCollection: storeCollection),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _deleteStoreCollection(
-                                storeCollection.storeCollectionId),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SingleChildScrollView(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ListTile(
+                          leading: storeCollection.collection
+                                      ?.collectionBackgroundImgPath !=
+                                  null
+                              ? Image.network(
+                                  storeCollection
+                                      .collection!.collectionBackgroundImgPath!,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                )
+                              : const Icon(Icons.collections,
+                                  color: Colors.purple, size: 40),
+                          title: Text(
+                              '${storeCollection.collection?.collectionName}',
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold)),
+                          subtitle: Text(
+                              'Description: ${storeCollection.collection?.collectionDescription}',
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.grey)),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _navigateToStoreCollectionForm(
+                                  storeCollection: storeCollection),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteStoreCollection(
+                                  storeCollection.storeCollectionId),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )));
               },
             );
           }
