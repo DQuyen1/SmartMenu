@@ -13,7 +13,7 @@ class StoreProductRepository {
       final response =
           await service.get('$url/productsizeprices', queryParameters: {
         'pageNumber': 1,
-        'pageSize': 10,
+        'pageSize': 20,
         'storeId': storeId,
       });
       log(response.toString());

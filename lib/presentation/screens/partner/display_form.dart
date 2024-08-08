@@ -282,41 +282,41 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              DropdownButtonFormField<int>(
-                value: widget.display?.collectionId,
-                hint: const Text('Select Collection'),
-                items: _collectionList?.map((collection) {
-                  return DropdownMenuItem<int>(
-                    value: collection.collectionId,
-                    child: Text(collection.collectionName),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _collectionIdController.text = value.toString();
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: 'Collection',
-                  labelStyle: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[800],
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                ),
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a collection';
-                  }
-                  return null;
-                },
-              ),
+              // DropdownButtonFormField<int>(
+              //   value: widget.display?.collectionId,
+              //   hint: const Text('Select Collection'),
+              //   items: _collectionList?.map((collection) {
+              //     return DropdownMenuItem<int>(
+              //       value: collection.collectionId,
+              //       child: Text(collection.collectionName),
+              //     );
+              //   }).toList(),
+              //   onChanged: (value) {
+              //     setState(() {
+              //       _collectionIdController.text = value.toString();
+              //     });
+              //   },
+              //   decoration: InputDecoration(
+              //     labelText: 'Collection',
+              //     labelStyle: TextStyle(
+              //       fontSize: 18,
+              //       color: Colors.grey[800],
+              //     ),
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(10),
+              //     ),
+              //     filled: true,
+              //     fillColor: Colors.grey[200],
+              //     contentPadding:
+              //         const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              //   ),
+              //   validator: (value) {
+              //     if (value == null) {
+              //       return 'Please select a collection';
+              //     }
+              //     return null;
+              //   },
+              // ),
               const SizedBox(height: 20),
               DropdownButtonFormField<int>(
                 value: widget.display?.templateId,
