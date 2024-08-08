@@ -67,31 +67,31 @@ class _DisplayDeviceState extends State<DisplayDevice> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          MouseRegion(
-            onEnter: (_) {
-              setState(() {
-                _isHovering = true;
-              });
-            },
-            onExit: (_) {
-              setState(() {
-                _isHovering = false;
-              });
-            },
-            child: AnimatedOpacity(
-              opacity: _isHovering ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: IconButton(
-                icon:
-                    Icon(_showImages ? Icons.visibility : Icons.visibility_off),
-                onPressed: _toggleImageVisibility,
-              ),
-            ),
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   actions: [
+      //     MouseRegion(
+      //       onEnter: (_) {
+      //         setState(() {
+      //           _isHovering = true;
+      //         });
+      //       },
+      //       onExit: (_) {
+      //         setState(() {
+      //           _isHovering = false;
+      //         });
+      //       },
+      //       child: AnimatedOpacity(
+      //         opacity: _isHovering ? 1.0 : 0.0,
+      //         duration: const Duration(milliseconds: 300),
+      //         child: IconButton(
+      //           icon:
+      //               Icon(_showImages ? Icons.visibility : Icons.visibility_off),
+      //           onPressed: _toggleImageVisibility,
+      //         ),
+      //       ),
+      //     ),
+      //   ],
+      // ),
       body: FutureBuilder<List<Image>>(
         future: _futureImages,
         builder: (context, snapshot) {
