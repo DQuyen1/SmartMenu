@@ -8,14 +8,22 @@ class StoreProductRepository {
 
   final BaseService service = BaseService();
 
-  Future<List<StoreProduct>> getAll(int storeId) async {
+  Future<List<StoreProduct>> getAll(int storeId, {String? searchString}) async {
     try {
-      final response =
-          await service.get('$url/productsizeprices', queryParameters: {
+      // Explicitly declare the type as Map<String, dynamic>
+      final Map<String, dynamic> queryParameters = {
         'pageNumber': 1,
         'pageSize': 20,
         'storeId': storeId,
-      });
+      };
+
+      // Add searchString to query parameters if provided
+      if (searchString != null && searchString.isNotEmpty) {
+        queryParameters['searchString'] = searchString;
+      }
+
+      final response = await service.get('$url/productsizeprices',
+          queryParameters: queryParameters);
       log(response.toString());
 
       if (response.statusCode == 200) {

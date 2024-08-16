@@ -1,9 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/store_device.dart';
+import 'package:smart_menu/models/subscription.dart';
 import 'package:smart_menu/presentation/screens/display_device.dart';
+import 'package:smart_menu/presentation/screens/shared/payment_webview.dart';
 import 'package:smart_menu/repository/store_device_repository.dart';
+import 'package:smart_menu/repository/subscription_repository.dart';
 import 'package:smart_menu/presentation/screens/partner/store_device_form.dart';
+import 'package:vnpay_flutter/vnpay_flutter.dart';
 
 class StoreDeviceListScreen extends StatefulWidget {
   final int storeId;
@@ -16,6 +20,8 @@ class StoreDeviceListScreen extends StatefulWidget {
 
 class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
   final StoreDeviceRepository _storeDeviceRepository = StoreDeviceRepository();
+  final SubscriptionRepository _subscriptionRepository =
+      SubscriptionRepository();
   late Future<List<StoreDevice>> _futureStoreDevices;
 
   void _fetchStoreDevices() {
@@ -90,6 +96,84 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
     }
   }
 
+  void _subscribeToDevice(int storeDeviceId) async {
+    final subscriptions = await _subscriptionRepository.getAll();
+
+    if (subscriptions.isEmpty) {
+      _showSnackBar('No subscription plans available', Colors.red);
+      return;
+    }
+
+    Subscription? selectedSubscription;
+    final result = await showDialog<Subscription?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Choose a Subscription Plan'),
+          content: DropdownButtonFormField<Subscription>(
+            decoration: const InputDecoration(labelText: 'Subscription Plan'),
+            items: subscriptions.map((Subscription subscription) {
+              return DropdownMenuItem<Subscription>(
+                value: subscription,
+                child: Text(subscription.name),
+              );
+            }).toList(),
+            onChanged: (Subscription? value) {
+              selectedSubscription = value;
+            },
+            isExpanded: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, selectedSubscription);
+              },
+              child: const Text('Subscribe'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == null || selectedSubscription == null) {
+      _showSnackBar('Subscription cancelled or not selected', Colors.red);
+      return;
+    }
+    final paymentUrl = VNPAYFlutter.instance.generatePaymentUrl(
+      url: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
+      version: '2.0.1',
+      tmnCode: '5SMB5Q9G',
+      txnRef: DateTime.now().millisecondsSinceEpoch.toString(),
+      orderInfo: selectedSubscription!.description,
+      amount: selectedSubscription!.price,
+      returnUrl: 'https://www.google.com',
+      ipAdress: '58.187.188.166',
+      vnpayHashKey: 'ZKWCA7U2LJHLVPRPXDH0I3AG172ADADW',
+      vnPayHashType: VNPayHashType.HMACSHA512,
+      vnpayExpireDate: DateTime.now().add(const Duration(days: 500)),
+    );
+
+    final paymentResult = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PaymentWebView(paymentUrl: paymentUrl),
+      ),
+    );
+
+    if (paymentResult == true) {
+      final success = await _storeDeviceRepository.saveSubscription(
+        storeDeviceId: storeDeviceId,
+        subscriptionId: selectedSubscription!.subscriptionId,
+      );
+      _showSnackBar('Subscription successful', Colors.green);
+    } else {
+      _showSnackBar('Payment failed or cancelled', Colors.red);
+    }
+  }
+
   void _showSnackBar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -110,9 +194,7 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -210,6 +292,18 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
                             child: const Text('Display',
                                 style: TextStyle(color: Colors.white)),
                           ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onPressed: () =>
+                                _subscribeToDevice(storeDevice.storeDeviceId),
+                            child: const Text('Subscribe',
+                                style: TextStyle(color: Colors.white)),
+                          ),
                         ],
                       ),
                     ],
@@ -229,6 +323,7 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
   }
 }
 
+// Custom HttpOverrides to bypass SSL certificate issues
 class _DevHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
