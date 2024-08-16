@@ -146,12 +146,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         CustomTextField(
                           controller: emailController,
-                          hintText: 'Enter your email',
+                          hintText: 'Enter username',
                           isPassword: false,
-                          label: "Email",
+                          label: "Username",
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return 'Please enter your Username';
                             }
                             return null;
                           },

@@ -35,7 +35,7 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
       _cateList = await cateRepository.getAll(widget.storeId);
       setState(() {});
     } catch (e) {
-      _showSnackBar('Failed to fetch menus: $e', Colors.red);
+      _showSnackBar('Failed to load category: $e', Colors.red);
     }
   }
 

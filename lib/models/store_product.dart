@@ -1,4 +1,3 @@
-// Update the StoreProduct model to include the product field
 class StoreProduct {
   int storeProductId;
   int storeId;

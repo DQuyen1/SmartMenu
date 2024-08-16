@@ -15,8 +15,6 @@ class StoreDeviceRepository {
         'pageSize': 10,
         'storeId': storeId,
       });
-      log(response.toString());
-
       if (response.statusCode == 200) {
         final List<dynamic> storeDevices = response.data;
 
@@ -65,6 +63,35 @@ class StoreDeviceRepository {
       return false;
     } catch (e) {
       throw Exception('Error deleting store device: $e');
+    }
+  }
+
+  static const String deviceSubscriptionUrl =
+      'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/DeviceSubscriptions';
+
+  Future<bool> saveSubscription({
+    required int storeDeviceId,
+    required int subscriptionId,
+  }) async {
+    try {
+      final requestBody = {
+        "storeDeviceId": storeDeviceId,
+        "subscriptionId": subscriptionId,
+      };
+
+      final response =
+          await service.post(deviceSubscriptionUrl, data: requestBody);
+
+      if (response.statusCode == 201) {
+        log('Subscription saved successfully for device $storeDeviceId.');
+        return true;
+      } else {
+        log('Failed to save subscription. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      log('Error saving subscription: $e');
+      return false;
     }
   }
 }
