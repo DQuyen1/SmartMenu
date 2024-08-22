@@ -69,7 +69,7 @@ class StoreDeviceRepository {
   static const String deviceSubscriptionUrl =
       'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/DeviceSubscriptions';
 
-  Future<bool> saveSubscription({
+  Future<int> saveSubscription({
     required int storeDeviceId,
     required int subscriptionId,
   }) async {
@@ -83,14 +83,47 @@ class StoreDeviceRepository {
           await service.post(deviceSubscriptionUrl, data: requestBody);
 
       if (response.statusCode == 201) {
+        final responseData = response.data;
+
+        final deviceSubscriptionId = responseData['deviceSubscriptionId'];
+
         log('Subscription saved successfully for device $storeDeviceId.');
+
+        return deviceSubscriptionId;
+      } else {
+        log('Failed to save subscription. Status code: ${response.statusCode}');
+        return 0;
+      }
+    } catch (e) {
+      log('Error saving subscription: $e');
+      return 0;
+    }
+  }
+
+  static const String transactionUrl =
+      'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Transactions';
+
+  Future<bool> saveTransaction(
+      {required int deviceSubscriptionId,
+      required double amount,
+      required int payType}) async {
+    try {
+      final requestBody = {
+        "deviceSubscriptionId": deviceSubscriptionId,
+        "amount": amount,
+        "payType": payType,
+      };
+      final response = await service.post(transactionUrl, data: requestBody);
+
+      if (response.statusCode == 201) {
+        log('Transaction saved successfully.');
         return true;
       } else {
         log('Failed to save subscription. Status code: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      log('Error saving subscription: $e');
+      log('Error saving transaction: $e');
       return false;
     }
   }

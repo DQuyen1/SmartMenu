@@ -24,9 +24,13 @@ class _PaymentWebViewState extends State<PaymentWebView> {
           onPageFinished: (String url) {
             if (url.contains('vnp_ResponseCode=00')) {
               // Payment successful
-              Navigator.of(context).pop(true);
+              Uri uri = Uri.parse(url);
+              String? bankCode = uri.queryParameters['vnp_BankCode'];
+              Navigator.of(context).pop({
+                'success': true,
+                'vnp_BankCode': bankCode,
+              });
             } else if (url.contains('vnp_ResponseCode')) {
-              // Payment failed or cancelled
               Navigator.of(context).pop(false);
             }
           },

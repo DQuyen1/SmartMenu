@@ -11,9 +11,9 @@ class AppRouter {
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
-      login: (context) => LoginScreen(),
+      // login: (context) => LoginScreen(),
       splash: (context) => SplashScreen(),
-      home: (context) => NavigatorProvider(),
+      home: (context) => LoginScreen(),
     };
   }
 }

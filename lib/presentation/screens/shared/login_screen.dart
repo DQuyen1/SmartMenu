@@ -67,7 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
               content: Text('Login successful!'),
             ),
           );
-
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
