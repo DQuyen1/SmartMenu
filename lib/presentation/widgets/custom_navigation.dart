@@ -56,7 +56,6 @@ class NavigatorProviderState extends State<NavigatorProvider> {
             brandId: 0,
             storeId: 0,
           ),
-          LoginScreen(),
           ProfileScreen(),
         ],
       ),

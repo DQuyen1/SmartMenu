@@ -4,6 +4,7 @@ import 'package:smart_menu/models/store_device.dart';
 import 'package:smart_menu/models/subscription.dart';
 import 'package:smart_menu/presentation/screens/display_device.dart';
 import 'package:smart_menu/presentation/screens/shared/payment_webview.dart';
+import 'package:smart_menu/presentation/screens/transaction_bill.dart';
 import 'package:smart_menu/repository/store_device_repository.dart';
 import 'package:smart_menu/repository/subscription_repository.dart';
 import 'package:smart_menu/presentation/screens/partner/store_device_form.dart';
@@ -150,7 +151,7 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
       txnRef: DateTime.now().millisecondsSinceEpoch.toString(),
       orderInfo: selectedSubscription!.description,
       amount: selectedSubscription!.price,
-      returnUrl: 'https://www.google.com',
+      returnUrl: 'vnpay-return://callback',
       ipAdress: '58.187.188.166',
       vnpayHashKey: 'ZKWCA7U2LJHLVPRPXDH0I3AG172ADADW',
       vnPayHashType: VNPayHashType.HMACSHA512,
@@ -163,15 +164,51 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
       ),
     );
 
-    if (paymentResult == true) {
-      final success = await _storeDeviceRepository.saveSubscription(
+    if (paymentResult != null && paymentResult['success'] == true) {
+      String? bankCode = paymentResult['vnp_BankCode'];
+      int payType;
+      if (bankCode == 'VISA' || bankCode == 'MASTERCARD') {
+        payType = 1;
+      } else {
+        payType = 0;
+      }
+      final deviceSubscriptionId =
+          await _storeDeviceRepository.saveSubscription(
         storeDeviceId: storeDeviceId,
         subscriptionId: selectedSubscription!.subscriptionId,
       );
-      _showSnackBar('Subscription successful', Colors.green);
-    } else {
-      _showSnackBar('Payment failed or cancelled', Colors.red);
+
+      if (deviceSubscriptionId != null) {
+        final transactionSuccess = await _storeDeviceRepository.saveTransaction(
+          deviceSubscriptionId: deviceSubscriptionId,
+          amount: selectedSubscription!.price,
+          payType: payType,
+        );
+
+        if (transactionSuccess) {
+          _showSnackBar('Subscription and transaction recorded successfully',
+              Colors.green);
+          _showBillSummary(
+              selectedSubscription!.price, selectedSubscription!.description);
+        } else {
+          _showSnackBar('Failed to record transaction', Colors.orange);
+        }
+      } else {
+        _showSnackBar('Subscription failed', Colors.red);
+      }
     }
+  }
+
+  void _showBillSummary(double amount, String description) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TransactionBillScreen(
+          amount: amount,
+          description: description,
+        ),
+      ),
+    );
   }
 
   void _showSnackBar(String message, Color backgroundColor) {
@@ -323,7 +360,6 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
   }
 }
 
-// Custom HttpOverrides to bypass SSL certificate issues
 class _DevHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
