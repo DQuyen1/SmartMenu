@@ -19,11 +19,13 @@ class StoreDeviceListScreen extends StatefulWidget {
   State<StoreDeviceListScreen> createState() => _StoreDeviceListScreenState();
 }
 
-class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
+class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
+    with SingleTickerProviderStateMixin {
   final StoreDeviceRepository _storeDeviceRepository = StoreDeviceRepository();
   final SubscriptionRepository _subscriptionRepository =
       SubscriptionRepository();
   late Future<List<StoreDevice>> _futureStoreDevices;
+  late TabController _tabController;
 
   void _fetchStoreDevices() {
     setState(() {
@@ -35,7 +37,24 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
   void initState() {
     super.initState();
     _fetchStoreDevices();
+    _tabController = TabController(length: 2, vsync: this);
     HttpOverrides.global = _DevHttpOverrides();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _approveDevice(int storeDeviceId) async {
+    final success = await _storeDeviceRepository.acceptDevice(storeDeviceId);
+    if (success) {
+      _fetchStoreDevices();
+      _showSnackBar('Device approved successfully', Colors.green);
+    } else {
+      _showSnackBar('Failed to approve device', Colors.red);
+    }
   }
 
   void _navigateToStoreDeviceForm({StoreDevice? storeDevice}) async {
@@ -92,7 +111,7 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
           await _storeDeviceRepository.deleteStoreDevice(storeDeviceId);
       _fetchStoreDevices();
       _showSnackBar(
-          success ? 'Failed to delete' : 'Store device deleted successfully',
+          success ? 'Failed to delete' : 'Device deleted successfully',
           success ? Colors.red : Colors.green);
     }
   }
@@ -240,122 +259,85 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
-          child: AppBar(
-            title: const Text(
-              'Store Devices',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: Colors.red.shade100,
-          ),
+      appBar: AppBar(
+        title: const Text('Store Devices'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Approved Devices'),
+            Tab(text: 'Pending Devices'),
+          ],
         ),
       ),
-      body: FutureBuilder<List<StoreDevice>>(
-        future: _futureStoreDevices,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No store devices found'));
-          } else {
-            final storeDevices = snapshot.data!;
-            return ListView.builder(
-              itemCount: storeDevices.length,
-              itemBuilder: (context, index) {
-                final storeDevice = storeDevices[index];
-                return Card(
-                  elevation: 4.0,
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 12.0, vertical: 8.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.devices,
-                            size: 40, color: Colors.red),
-                        title: Text(
-                          storeDevice.storeDeviceName,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        subtitle: Text(
-                            'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _navigateToStoreDeviceForm(
-                                storeDevice: storeDevice),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () =>
-                                _deleteStoreDevice(storeDevice.storeDeviceId),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DisplayDevice(
-                                      deviceId: storeDevice.storeDeviceId),
-                                ),
-                              );
-                            },
-                            child: const Text('Display',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                            onPressed: () =>
-                                _subscribeToDevice(storeDevice.storeDeviceId),
-                            child: const Text('Subscribe',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }
-        },
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildDeviceList(true),
+          _buildDeviceList(false),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToStoreDeviceForm(),
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildDeviceList(bool isApproved) {
+    return FutureBuilder<List<StoreDevice>>(
+      future: _futureStoreDevices,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No devices found'));
+        } else {
+          final storeDevices = snapshot.data!
+              .where((device) => device.isApproved == isApproved)
+              .toList();
+          return ListView.builder(
+            itemCount: storeDevices.length,
+            itemBuilder: (context, index) {
+              final storeDevice = storeDevices[index];
+              return Card(
+                child: ListTile(
+                  title: Text(storeDevice.storeDeviceName),
+                  subtitle: Text(
+                      'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
+                  trailing: isApproved
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _navigateToStoreDeviceForm(
+                                  storeDevice: storeDevice),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () =>
+                                  _deleteStoreDevice(storeDevice.storeDeviceId),
+                            ),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _subscribeToDevice(storeDevice.storeDeviceId),
+                              child: const Text('Subscribe'),
+                            ),
+                          ],
+                        )
+                      : ElevatedButton(
+                          onPressed: () =>
+                              _approveDevice(storeDevice.storeDeviceId),
+                          child: const Text('Accept this device'),
+                        ),
+                ),
+              );
+            },
+          );
+        }
+      },
     );
   }
 }

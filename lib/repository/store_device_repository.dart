@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:smart_menu/config/base_service.dart';
 import 'package:smart_menu/models/store_device.dart';
 
@@ -63,6 +64,37 @@ class StoreDeviceRepository {
       return false;
     } catch (e) {
       throw Exception('Error deleting store device: $e');
+    }
+  }
+
+  Future<bool> deviceExists(int storeId, String name) async {
+    try {
+      final response = await service.get(url, queryParameters: {
+        'pageNumber': 1,
+        'pageSize': 10,
+        'storeId': storeId,
+        'searchString': name,
+      });
+      if (response.statusCode == 200) {
+        final List<dynamic> storeDevices = response.data;
+        return storeDevices.isNotEmpty;
+      } else {
+        throw Exception(
+            'Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error fetching data: $error');
+    }
+  }
+
+  Future<bool> acceptDevice(int storeDeviceId) async {
+    try {
+      final response = await service.put('$url/$storeDeviceId/status',
+          statusCodes: [200], queryParameters: {});
+      if (response.statusCode == 200) return true;
+      return false;
+    } catch (e) {
+      throw Exception('Error updating store product: $e');
     }
   }
 
