@@ -41,8 +41,27 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
     super.dispose();
   }
 
+  Future<bool> _validateDevice() async {
+    String name = _nameController.text;
+    bool exists = await _storeDeviceRepository.deviceExists(
+      widget.storeId,
+      name,
+    );
+
+    if (exists) {
+      _showSnackBar('Device already exists', Colors.red);
+      return false;
+    }
+
+    return true;
+  }
+
   void _saveStoreDevice() async {
     if (_formKey.currentState!.validate()) {
+      if (widget.storeDevice == null && !(await _validateDevice())) {
+        return;
+      }
+
       final storeDeviceData = {
         'storeID': widget.storeDevice?.storeId ?? widget.storeId,
         'storeDeviceName': _nameController.text,
@@ -62,10 +81,6 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
       if (success) {
         Navigator.pop(context, true);
       } else {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(content: Text('Failed to save store device')),
-        // );
-
         _showSnackBar('Failed to save store device', Colors.red);
       }
     }
@@ -91,9 +106,7 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -199,7 +212,7 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
               const SizedBox(height: 20),
               Center(
                 child: SizedBox(
-                  width: double.infinity, // Make button full width
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _saveStoreDevice,
                     style: ElevatedButton.styleFrom(

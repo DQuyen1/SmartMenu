@@ -5,6 +5,8 @@ class StoreDevice {
   final int deviceWidth;
   final int deviceHeight;
   final dynamic displays;
+  final int ratioType;
+  final bool isApproved;
   final bool isDeleted;
 
   StoreDevice({
@@ -13,6 +15,8 @@ class StoreDevice {
     required this.storeDeviceName,
     required this.deviceWidth,
     required this.deviceHeight,
+    required this.ratioType,
+    required this.isApproved,
     this.displays,
     required this.isDeleted,
   });
@@ -25,6 +29,8 @@ class StoreDevice {
       deviceWidth: json['deviceWidth'],
       deviceHeight: json['deviceHeight'],
       displays: json['displays'],
+      ratioType: json['ratioType'],
+      isApproved: json['isApproved'],
       isDeleted: json['isDeleted'],
     );
   }
