@@ -41,7 +41,6 @@ class Collection {
   final int brandId;
   final String collectionName;
   final String collectionDescription;
-  final String? collectionBackgroundImgPath;
   final bool isDeleted;
 
   Collection({
@@ -49,7 +48,6 @@ class Collection {
     required this.brandId,
     required this.collectionName,
     required this.collectionDescription,
-    required this.collectionBackgroundImgPath,
     required this.isDeleted,
   });
 
@@ -59,7 +57,6 @@ class Collection {
       brandId: json['brandId'],
       collectionName: json['collectionName'],
       collectionDescription: json['collectionDescription'],
-      collectionBackgroundImgPath: json['collectionBackgroundImgPath'],
       isDeleted: json['isDeleted'],
     );
   }
@@ -70,7 +67,6 @@ class Collection {
       'brandId': brandId,
       'collectionName': collectionName,
       'collectionDescription': collectionDescription,
-      'collectionBackgroundImgPath': collectionBackgroundImgPath,
       'isDeleted': isDeleted,
     };
   }

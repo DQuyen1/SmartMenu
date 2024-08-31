@@ -10,14 +10,11 @@ class StoreProductRepository {
 
   Future<List<StoreProduct>> getAll(int storeId, {String? searchString}) async {
     try {
-      // Explicitly declare the type as Map<String, dynamic>
       final Map<String, dynamic> queryParameters = {
         'pageNumber': 1,
-        'pageSize': 20,
+        'pageSize': 1000,
         'storeId': storeId,
       };
-
-      // Add searchString to query parameters if provided
       if (searchString != null && searchString.isNotEmpty) {
         queryParameters['searchString'] = searchString;
       }

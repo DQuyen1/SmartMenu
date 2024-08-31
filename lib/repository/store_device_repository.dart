@@ -98,6 +98,17 @@ class StoreDeviceRepository {
     }
   }
 
+  Future<bool> changeRatioType(int storeDeviceId) async {
+    try {
+      final response = await service.put('$url/$storeDeviceId/ratio-type',
+          statusCodes: [200], queryParameters: {});
+      if (response.statusCode == 200) return true;
+      return false;
+    } catch (e) {
+      throw Exception('Error updating store product: $e');
+    }
+  }
+
   static const String deviceSubscriptionUrl =
       'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/DeviceSubscriptions';
 

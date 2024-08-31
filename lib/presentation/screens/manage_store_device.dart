@@ -26,10 +26,24 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
       SubscriptionRepository();
   late Future<List<StoreDevice>> _futureStoreDevices;
   late TabController _tabController;
+  String _searchQuery = '';
 
   void _fetchStoreDevices() {
     setState(() {
-      _futureStoreDevices = _storeDeviceRepository.getAll(widget.storeId);
+      _futureStoreDevices =
+          _storeDeviceRepository.getAll(widget.storeId).then((storeDevices) {
+        storeDevices.sort((a, b) => b.storeDeviceId.compareTo(a.storeDeviceId));
+        if (_searchQuery.isNotEmpty) {
+          storeDevices = storeDevices
+              .where((device) =>
+                  device.storeDeviceName
+                      .toLowerCase()
+                      .contains(_searchQuery.toLowerCase()) ??
+                  false)
+              .toList();
+        }
+        return storeDevices;
+      });
     });
   }
 
@@ -113,6 +127,16 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
       _showSnackBar(
           success ? 'Failed to delete' : 'Device deleted successfully',
           success ? Colors.red : Colors.green);
+    }
+  }
+
+  void _changeRatioType(int storeDeviceId) async {
+    final success = await _storeDeviceRepository.changeRatioType(storeDeviceId);
+    if (success) {
+      _fetchStoreDevices();
+      _showSnackBar('Ratio type changed successfully', Colors.green);
+    } else {
+      _showSnackBar('Failed to change ratio type', Colors.red);
     }
   }
 
@@ -233,12 +257,25 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
   void _showSnackBar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+        content: Row(
+          children: [
+            Icon(
+              backgroundColor == Colors.green
+                  ? Icons.check_circle
+                  : Icons.error,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
@@ -246,7 +283,7 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
@@ -259,28 +296,37 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Store Devices'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Approved Devices'),
-            Tab(text: 'Pending Devices'),
-          ],
+        appBar: AppBar(
+          title: const Text('Devices'),
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.black,
+            labelColor: Colors.green,
+            tabs: const [
+              Tab(text: 'Approved Devices'),
+              Tab(text: 'Pending Devices'),
+            ],
+          ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildDeviceList(true),
-          _buildDeviceList(false),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToStoreDeviceForm(),
-        child: const Icon(Icons.add),
-      ),
-    );
+        body: Column(
+          children: [
+            _buildSearchUI(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildDeviceList(true),
+                  _buildDeviceList(false),
+                ],
+              ),
+            )
+          ],
+        )
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () => _navigateToStoreDeviceForm(),
+        //   child: const Icon(Icons.add),
+        // ),
+        );
   }
 
   Widget _buildDeviceList(bool isApproved) {
@@ -301,36 +347,82 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
             itemCount: storeDevices.length,
             itemBuilder: (context, index) {
               final storeDevice = storeDevices[index];
+              final ratioTypeLabel =
+                  storeDevice.ratioType == 0 ? 'Horizontal' : 'Vertical';
               return Card(
+                elevation: 5,
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: ListTile(
-                  title: Text(storeDevice.storeDeviceName),
-                  subtitle: Text(
-                      'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}'),
+                  contentPadding: const EdgeInsets.all(16),
+                  title: Text(
+                    storeDevice.storeDeviceName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      Text(
+                        'Type: $ratioTypeLabel',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
                   trailing: isApproved
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _subscribeToDevice(storeDevice.storeDeviceId),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                padding: EdgeInsets.symmetric(horizontal: 14),
+                              ),
+                              child: const Text(
+                                'Subscribe',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ),
                             IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () => _navigateToStoreDeviceForm(
-                                  storeDevice: storeDevice),
+                              onPressed: () =>
+                                  _changeRatioType(storeDevice.storeDeviceId),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () =>
                                   _deleteStoreDevice(storeDevice.storeDeviceId),
                             ),
-                            ElevatedButton(
-                              onPressed: () =>
-                                  _subscribeToDevice(storeDevice.storeDeviceId),
-                              child: const Text('Subscribe'),
-                            ),
                           ],
                         )
-                      : ElevatedButton(
-                          onPressed: () =>
-                              _approveDevice(storeDevice.storeDeviceId),
-                          child: const Text('Accept this device'),
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.check,
+                                color: Colors.green,
+                              ),
+                              onPressed: () =>
+                                  _approveDevice(storeDevice.storeDeviceId),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.red),
+                              onPressed: () {
+                                _deleteStoreDevice(storeDevice.storeDeviceId);
+                              },
+                            ),
+                          ],
                         ),
                 ),
               );
@@ -338,6 +430,48 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
           );
         }
       },
+    );
+  }
+
+  Widget _buildSearchUI() {
+    return Container(
+      padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      offset: Offset(0, 2),
+                      blurRadius: 8),
+                ],
+              ),
+              margin: EdgeInsets.only(right: 16, top: 8, bottom: 8),
+              child: Padding(
+                padding:
+                    EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                      _fetchStoreDevices();
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
