@@ -44,7 +44,7 @@ class _StoreMenuFormScreenState extends State<StoreMenuFormScreen> {
   void _saveStoreMenu() async {
     if (_formKey.currentState!.validate()) {
       final storeMenuData = {
-        'storeId': widget.storeMenu?.storeId ?? widget.storeId,
+        'storeId': widget.storeId,
         'menuId': int.parse(_menuIdController.text),
       };
 

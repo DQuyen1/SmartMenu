@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/display.dart';
+import 'package:smart_menu/presentation/screens/display_detail.dart';
 import 'package:smart_menu/presentation/screens/partner/display_form.dart';
 import 'package:smart_menu/repository/display_repository.dart';
 
@@ -17,10 +18,15 @@ class DisplayListScreen extends StatefulWidget {
 class _DisplayListScreenState extends State<DisplayListScreen> {
   late Future<List<Display>> _futureDisplays;
   final DisplayRepository _repository = DisplayRepository();
+  String _searchQuery = '';
 
   void _fetchDisplay() {
     setState(() {
-      _futureDisplays = _repository.getAll();
+      _futureDisplays = _repository.getAll().then((displays) {
+        displays.sort((a, b) => b.displayId.compareTo(a.displayId));
+
+        return displays;
+      });
     });
   }
 
@@ -100,9 +106,7 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -115,6 +119,50 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
     int seconds = totalSeconds % 60;
 
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  Future<String> _getMenuName(int? menuId) async {
+    if (menuId == null) return 'No menu';
+
+    try {
+      final menuName = await _repository.getMenuName(menuId);
+      return menuName;
+    } catch (e) {
+      return 'Error fetching menu';
+    }
+  }
+
+  Future<String> _getCollectionName(int? collectionId) async {
+    if (collectionId == null) return 'No collection';
+
+    try {
+      final collectionName = await _repository.getCollectionName(collectionId);
+      return collectionName;
+    } catch (e) {
+      return 'Error fetching collection';
+    }
+  }
+
+  Future<String> _getDeviceName(int? storeDeviceId) async {
+    if (storeDeviceId == null) return 'No device';
+
+    try {
+      final deviceName = await _repository.getDeviceName(storeDeviceId);
+      return deviceName;
+    } catch (e) {
+      return 'Error fetching device';
+    }
+  }
+
+  Future<String> _getTemplateName(int? templateId) async {
+    if (templateId == null) return 'No template';
+
+    try {
+      final templateName = await _repository.getTemplateName(templateId);
+      return templateName;
+    } catch (e) {
+      return 'Error fetching template';
+    }
   }
 
   @override
@@ -156,109 +204,206 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
               itemCount: displays.length,
               itemBuilder: (context, index) {
                 final display = displays[index];
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            if (display.displayImgPath != null &&
-                                Uri.tryParse(display.displayImgPath!)
-                                        ?.hasAbsolutePath ==
-                                    true)
-                              Image.network(
-                                display.displayImgPath!,
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              )
-                            else
-                              Container(
-                                width: 100,
-                                height: 100,
-                                color: Colors.grey.shade300,
-                                child: const Icon(
-                                  Icons.image,
-                                  color: Colors.grey,
-                                  size: 40,
-                                ),
-                              ),
-                            Expanded(
-                              child: ListTile(
-                                title: Text(
-                                  display.storeDeviceId.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (display.menuId != null)
-                                      Text(
-                                        display.menuId.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    if (display.collectionId != null)
-                                      Text(
-                                        display.collectionId.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    if (display.templateId != null)
-                                      Text(
-                                        display.templateId.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    if (display.activeHour != null)
-                                      Text(
-                                        formatActiveHour(display.activeHour!),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Colors.blue),
-                                      onPressed: () => _navigateToDisplayForm(
-                                          display: display),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.red),
-                                      onPressed: () =>
-                                          _deleteDisplay(display.displayId),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DisplayDetailScreen(display: display),
                       ),
-                    ],
+                    );
+                  },
+                  child: Card(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        if (display.displayImgPath != null &&
+                            Uri.tryParse(display.displayImgPath!)
+                                    ?.hasAbsolutePath ==
+                                true)
+                          Image.network(
+                            display.displayImgPath!,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          )
+                        else
+                          Container(
+                            width: 100,
+                            height: 100,
+                            color: Colors.grey.shade300,
+                            child: const Icon(
+                              Icons.image,
+                              color: Colors.grey,
+                              size: 40,
+                            ),
+                          ),
+                        Expanded(
+                          child: ListTile(
+                            title: FutureBuilder<String>(
+                              future: _getDeviceName(display.storeDeviceId),
+                              builder: (context, deviceNameSnapshot) {
+                                if (deviceNameSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Text(
+                                    'Loading...',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  );
+                                } else if (deviceNameSnapshot.hasError) {
+                                  return Text(
+                                    'Error fetching device',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  );
+                                } else {
+                                  return Text(
+                                    '${deviceNameSnapshot.data ?? 'No device'}',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // if (display.menuId != null)
+                                //   FutureBuilder<String>(
+                                //     future: _getMenuName(display.menuId),
+                                //     builder: (context, menuSnapshot) {
+                                //       if (menuSnapshot.connectionState ==
+                                //           ConnectionState.waiting) {
+                                //         return const Text(
+                                //           'Loading...',
+                                //           style: TextStyle(
+                                //             fontSize: 16,
+                                //             color: Colors.grey,
+                                //           ),
+                                //         );
+                                //       } else if (menuSnapshot.hasError) {
+                                //         return Text(
+                                //           'Error fetching menu',
+                                //           style: const TextStyle(
+                                //             fontSize: 16,
+                                //             color: Colors.grey,
+                                //           ),
+                                //         );
+                                //       } else {
+                                //         return Text(
+                                //           'Menu: ${menuSnapshot.data ?? 'No menu'}',
+                                //           style: const TextStyle(
+                                //             fontSize: 16,
+                                //             color: Colors.grey,
+                                //           ),
+                                //         );
+                                //       }
+                                //     },
+                                //   ),
+                                // if (display.collectionId != null)
+                                //   FutureBuilder<String>(
+                                //     future: _getCollectionName(
+                                //         display.collectionId),
+                                //     builder: (context, collectionSnapshot) {
+                                //       if (collectionSnapshot.connectionState ==
+                                //           ConnectionState.waiting) {
+                                //         return const Text(
+                                //           'Loading...',
+                                //           style: TextStyle(
+                                //             fontSize: 16,
+                                //             color: Colors.grey,
+                                //           ),
+                                //         );
+                                //       } else if (collectionSnapshot.hasError) {
+                                //         return Text(
+                                //           'Error fetching collection',
+                                //           style: const TextStyle(
+                                //             fontSize: 16,
+                                //             color: Colors.grey,
+                                //           ),
+                                //         );
+                                //       } else {
+                                //         return Text(
+                                //           'Collection: ${collectionSnapshot.data ?? 'No collection'}',
+                                //           style: const TextStyle(
+                                //             fontSize: 16,
+                                //             color: Colors.grey,
+                                //           ),
+                                //         );
+                                //       }
+                                //     },
+                                //   ),
+                                if (display.templateId != null)
+                                  FutureBuilder<String>(
+                                    future:
+                                        _getTemplateName(display.templateId),
+                                    builder: (context, templateSnapshot) {
+                                      if (templateSnapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Text(
+                                          'Loading...',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        );
+                                      } else if (templateSnapshot.hasError) {
+                                        return Text(
+                                          'Error fetching template',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        );
+                                      } else {
+                                        return Text(
+                                          'Template: ${templateSnapshot.data ?? 'No template'}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.blue),
+                                  onPressed: () =>
+                                      _navigateToDisplayForm(display: display),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
+                                  onPressed: () =>
+                                      _deleteDisplay(display.displayId),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

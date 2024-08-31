@@ -11,8 +11,10 @@ import 'package:smart_menu/presentation/screens/partner/store_product_form.dart'
 
 class StoreProductListScreen extends StatefulWidget {
   final int storeId;
+  final int brandId;
 
-  const StoreProductListScreen({super.key, required this.storeId});
+  const StoreProductListScreen(
+      {super.key, required this.storeId, required this.brandId});
 
   @override
   _StoreProductListScreenState createState() => _StoreProductListScreenState();
@@ -27,7 +29,9 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
   List<Category>? _cateList;
   String _searchQuery = '';
   int? _selectedCategory;
-  bool _isAscendingOrder = true;
+  // bool _isAscendingOrder = true;
+  String _sortOption = 'newest';
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +58,7 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
   void _fetchCategory() async {
     try {
       final cateRepository = CategoryRepository();
-      _cateList = await cateRepository.getAll(widget.storeId);
+      _cateList = await cateRepository.getAll(widget.brandId);
       setState(() {});
     } catch (e) {
       _showSnackBar('Failed to load category: $e', Colors.red);
@@ -63,8 +67,51 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
 
   void _fetchStoreProduct() {
     setState(() {
-      _futureStoreProducts =
-          _repository.getAll(widget.storeId, searchString: _searchQuery);
+      _futureStoreProducts = _repository
+          .getAll(widget.storeId, searchString: _searchQuery)
+          .then((storeProducts) {
+        switch (_sortOption) {
+          case 'newest':
+            storeProducts
+                .sort((a, b) => b.storeProductId.compareTo(a.storeProductId));
+            break;
+          case 'oldest':
+            storeProducts
+                .sort((a, b) => a.storeProductId.compareTo(b.storeProductId));
+            break;
+          case 'name_asc':
+            storeProducts.sort((a, b) =>
+                (a.product?.productName?.toLowerCase() ?? '')
+                    .compareTo(b.product?.productName?.toLowerCase() ?? ''));
+            break;
+          case 'name_desc':
+            storeProducts.sort((a, b) =>
+                (b.product?.productName?.toLowerCase() ?? '')
+                    .compareTo(a.product?.productName?.toLowerCase() ?? ''));
+            break;
+          case 'price_asc':
+            storeProducts.sort((a, b) =>
+                (a.product?.productSizePrices?.first.price ?? 0)
+                    .compareTo(b.product?.productSizePrices?.first.price ?? 0));
+          case 'price_desc':
+            storeProducts.sort((a, b) =>
+                (b.product?.productSizePrices?.first.price ?? 0)
+                    .compareTo(b.product?.productSizePrices?.first.price ?? 0));
+          default:
+            storeProducts
+                .sort((a, b) => b.storeProductId.compareTo(a.storeProductId));
+        }
+        if (_searchQuery.isNotEmpty) {
+          storeProducts = storeProducts
+              .where((storeProduct) =>
+                  storeProduct.product?.productName
+                      .toLowerCase()
+                      .contains(_searchQuery.toLowerCase()) ??
+                  false)
+              .toList();
+        }
+        return storeProducts;
+      });
     });
   }
 
@@ -161,9 +208,7 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -377,50 +422,80 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
 
     var sizePrices = storeProduct.product!.productSizePrices;
 
-    // Check if it's a single size (type 3)
-    if (sizePrices.length == 1 && sizePrices[0].productSizeType == 3) {
+    if (sizePrices.length == 1) {
       return Text(
         "Price: \$${sizePrices[0].price}",
         style: TextStyle(
-            fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blue),
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          color: Colors.blue,
+        ),
       );
+    }
+
+    Map<int, String> sizeLabelsMap = {
+      0: "S",
+      1: "M",
+      2: "L",
+    };
+
+    List<String> sizeLabels = [];
+    List<String> priceLabels = [];
+
+    sizePrices.forEach((psp) {
+      String sizeLabel = sizeLabelsMap[psp.productSizeType] ?? "Unknown";
+
+      if (sizeLabel != "Unknown") {
+        sizeLabels.add(sizeLabel);
+        priceLabels.add("\$${psp.price}");
+      }
+    });
+
+    if (sizeLabels.isEmpty) {
+      return Text("No sizes available");
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Sizes and Prices:",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: sizeLabels
+              .map((label) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ))
+              .toList(),
         ),
-        ...sizePrices.map((psp) {
-          String sizeLabel = "";
-          switch (psp.productSizeType) {
-            case 0:
-              sizeLabel = "S";
-              break;
-            case 1:
-              sizeLabel = "M";
-              break;
-            case 2:
-              sizeLabel = "L";
-              break;
-            default:
-              sizeLabel = "Unknown";
-          }
-          return Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Size $sizeLabel"),
-                Text("\$${psp.price}",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.blue)),
-              ],
-            ),
-          );
-        }).toList(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: priceLabels
+              .map((price) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        price,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ))
+              .toList(),
+        ),
       ],
     );
   }
@@ -454,14 +529,49 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
               });
             },
           ),
+          SizedBox(width: 16),
+          DropdownButton<String>(
+            value: _sortOption,
+            items: [
+              DropdownMenuItem<String>(
+                value: 'newest',
+                child: Text('Newest'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'oldest',
+                child: Text('Oldest'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'name_asc',
+                child: Text('Name A-Z'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'name_desc',
+                child: Text('Name Z-A'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'price_asc',
+                child: Text('Price Ascending'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'price_desc',
+                child: Text('Price Descending'),
+              ),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _sortOption = value!;
+                _fetchStoreProduct();
+              });
+            },
+          ),
+          SizedBox(width: 16),
           Material(
             color: Colors.transparent,
             child: InkWell(
               splashColor: Colors.grey.withOpacity(0.2),
               borderRadius: BorderRadius.circular(5),
-              onTap: () {
-                // Implement your filter logic here
-              },
+              onTap: () {},
               child: Container(
                 padding: EdgeInsets.only(left: 8),
                 child: Row(
@@ -510,7 +620,7 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value;
-                      _fetchStoreProduct(); // Trigger search
+                      _fetchStoreProduct();
                     });
                   },
                   style: TextStyle(fontSize: 18),
@@ -538,7 +648,7 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
               child: InkWell(
                 borderRadius: BorderRadius.circular(50),
                 onTap: () {
-                  _fetchStoreProduct(); // Trigger search
+                  _fetchStoreProduct();
                 },
                 child: Container(
                   padding: EdgeInsets.all(16),
@@ -551,32 +661,6 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
       ),
     );
   }
-}
-
-Widget _buildProductList() {
-  return ListView.builder(
-    // itemCount: _filteredProducts.length,
-    itemBuilder: (context, index) {
-      // final product = _filteredProducts[index];
-      return ListTile(
-          // title: Text(product.name),
-          // Display other product details
-          );
-    },
-  );
-}
-
-void _applyFilters() {
-  // // setState(() {
-  // //   _filteredProducts = _products.where((product) {
-  // //     final matchesQuery = product.name
-  // //         .toLowerCase()
-  // //         .contains(_searchQuery.toLowerCase());
-
-  //     // Add other filter conditions
-  //     return matchesQuery;
-  //   }).toList();
-  // });
 }
 
 class _DevHttpOverrides extends HttpOverrides {

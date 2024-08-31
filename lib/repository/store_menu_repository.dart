@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:smart_menu/config/base_service.dart';
 import 'package:smart_menu/models/store_menu.dart';
+import 'package:smart_menu/models/product.dart';
 
 class StoreMenuRepository {
   static const String url =
@@ -12,7 +13,7 @@ class StoreMenuRepository {
     try {
       final response = await service.get(url, queryParameters: {
         'pageNumber': 1,
-        'pageSize': 10,
+        'pageSize': 1000,
         'storeId': storeId,
       });
       log(response.toString());
@@ -65,6 +66,27 @@ class StoreMenuRepository {
       return false;
     } catch (e) {
       throw Exception('Error deleting store menu: $e');
+    }
+  }
+
+  Future<List<Product>> getListProduct(int menuId) async {
+    try {
+      final response = await service.get(
+          'http://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Products/menu-collection?menuId=$menuId',
+          queryParameters: {
+            'pageNumber': 1,
+            'pageSize': 10,
+            'menuId': menuId,
+          });
+      if (response.statusCode == 200) {
+        final List<dynamic> products = response.data;
+        return products.map((product) => Product.fromJson(product)).toList();
+      } else {
+        throw Exception(
+            'Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching store menu: $e');
     }
   }
 }

@@ -23,25 +23,12 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
-          child: AppBar(
-            title: const Text(
-              'Dashboard',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: Colors.blue.shade100,
-          ),
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        backgroundColor: Colors.green.shade800,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
         ),
       ),
       body: SingleChildScrollView(
@@ -50,145 +37,11 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section 1: Key Metrics
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildMetricCard("Total Sales", "\$5,000", Colors.blue),
-                  _buildMetricCard("New Orders", "25", Colors.green),
-                ],
-              ),
+              _buildKeyMetrics(),
               const SizedBox(height: 20),
-
-              // Section 2: Charts or Graphs
-              _buildChartCard("Sales Trend"), // Example chart
-
+              _buildSalesChart(),
               const SizedBox(height: 20),
-
-              // Section 3: Recent Activity
-              const Text(
-                "Recent Activity",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              _buildActivityItem(
-                "Order #1234 placed",
-                Icons.shopping_cart,
-                Colors.orange,
-              ),
-              _buildActivityItem(
-                "Payment received for Order #5678",
-                Icons.attach_money,
-                Colors.green,
-              ),
-              const SizedBox(height: 20),
-
-              // Section 4: Manage Buttons
-              const Text(
-                "Manage Options",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Menu",
-                    Icons.menu_book,
-                    Colors.blue,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MenuListScreen(brandId: brandId),
-                      ),
-                    ),
-                  ),
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Template",
-                    Icons.description,
-                    Colors.green,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TemplateListScreen(brandId: brandId),
-                      ),
-                    ),
-                  ),
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Store Menu",
-                    Icons.store,
-                    Colors.orange,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StoreMenuListScreen(storeId: storeId),
-                      ),
-                    ),
-                  ),
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Store Device",
-                    Icons.devices,
-                    Colors.red,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StoreDeviceListScreen(storeId: storeId),
-                      ),
-                    ),
-                  ),
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Store Collection",
-                    Icons.collections,
-                    Colors.purple,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StoreCollectionListScreen(storeId: storeId),
-                      ),
-                    ),
-                  ),
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Store Product",
-                    Icons.production_quantity_limits_sharp,
-                    Colors.teal,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StoreProductListScreen(storeId: storeId),
-                      ),
-                    ),
-                  ),
-                  _buildManageButtonCard(
-                    context,
-                    "Manage Display",
-                    Icons.display_settings,
-                    const Color.fromARGB(255, 147, 150, 0),
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DisplayListScreen(
-                          storeId: storeId,
-                          brandId: brandId,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              _buildManageOptions(context),
             ],
           ),
         ),
@@ -196,42 +49,38 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricCard(String title, String value, Color color) {
-    return SizedBox(
-      width: 170,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            gradient: LinearGradient(
-              colors: [
-                color.withOpacity(0.8),
-                color.withOpacity(0.4),
-              ], // Gradient example
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+  Widget _buildKeyMetrics() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildMetricCard(
+            "Total Sales", "\$5,000", Colors.blue, Icons.attach_money),
+        _buildMetricCard("New Orders", "25", Colors.green, Icons.shopping_cart),
+        _buildMetricCard("Active Users", "1,423", Colors.orange, Icons.people),
+      ],
+    );
+  }
+
+  Widget _buildMetricCard(
+      String title, String value, Color color, IconData icon) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        width: 100,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 30),
+            const SizedBox(height: 8),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+            Text(title,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                textAlign: TextAlign.center),
+          ],
         ),
       ),
     );
@@ -258,12 +107,9 @@ class DashboardScreen extends StatelessWidget {
               height: 200,
               child: LineChart(
                 LineChartData(
-                  gridData:
-                      FlGridData(show: false), // Optional: hide grid lines
-                  borderData:
-                      FlBorderData(show: false), // Optional: hide chart border
-                  titlesData:
-                      FlTitlesData(show: false), // Optional: hide axis titles
+                  gridData: FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
+                  titlesData: FlTitlesData(show: false),
                   minX: 0,
                   maxX: 11,
                   minY: 0,
@@ -310,8 +156,143 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildManageButtonCard(BuildContext context, String title,
-      IconData icon, Color color, VoidCallback onPressed) {
+  Widget _buildSalesChart() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Sales Trend",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 200,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(show: false),
+                  titlesData: FlTitlesData(show: false),
+                  borderData: FlBorderData(show: false),
+                  minX: 0,
+                  maxX: 6,
+                  minY: 0,
+                  maxY: 6,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: [
+                        FlSpot(0, 3),
+                        FlSpot(1, 2),
+                        FlSpot(2, 5),
+                        FlSpot(3, 3.1),
+                        FlSpot(4, 4),
+                        FlSpot(5, 3),
+                        FlSpot(6, 4),
+                      ],
+                      isCurved: true,
+                      color: Colors.blue,
+                      barWidth: 4,
+                      dotData: FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                          show: true, color: Colors.blue.withOpacity(0.3)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildManageOptions(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Manage Options",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10.0,
+          mainAxisSpacing: 10.0,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            // _buildManageButton(
+            //     context, "Manage Menu", Icons.menu_book, Colors.blue, () {
+            //   Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (context) => MenuListScreen(brandId: brandId)));
+            // }),
+            _buildManageButton(
+                context, "Manage Template", Icons.description, Colors.green,
+                () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          TemplateListScreen(brandId: brandId)));
+            }),
+            _buildManageButton(
+                context, "Store Menu", Icons.store, Colors.orange, () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StoreMenuListScreen(
+                            storeId: storeId,
+                            brandId: brandId,
+                          )));
+            }),
+            _buildManageButton(
+                context, "Store Device", Icons.devices, Colors.red, () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          StoreDeviceListScreen(storeId: storeId)));
+            }),
+            _buildManageButton(
+                context, "Store Collection", Icons.collections, Colors.purple,
+                () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StoreCollectionListScreen(
+                            storeId: storeId,
+                            brandId: brandId,
+                          )));
+            }),
+            _buildManageButton(context, "Store Product",
+                Icons.production_quantity_limits, Colors.teal, () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StoreProductListScreen(
+                            storeId: storeId,
+                            brandId: brandId,
+                          )));
+            }),
+            _buildManageButton(
+                context, "Manage Display", Icons.display_settings, Colors.amber,
+                () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DisplayListScreen(
+                          storeId: storeId, brandId: brandId)));
+            }),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildManageButton(BuildContext context, String title, IconData icon,
+      Color color, VoidCallback onPressed) {
     return GestureDetector(
       onTap: onPressed,
       child: Card(
@@ -322,10 +303,7 @@ class DashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             gradient: LinearGradient(
-              colors: [
-                color.withOpacity(0.8),
-                color.withOpacity(0.4),
-              ], // Gradient example
+              colors: [color.withOpacity(0.8), color.withOpacity(0.4)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -333,15 +311,14 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 48, color: Colors.white),
+              Icon(icon, size: 40, color: Colors.white),
               const SizedBox(height: 8),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ],

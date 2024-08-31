@@ -116,9 +116,7 @@ class _MenuListScreenState extends State<MenuListScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -165,8 +163,8 @@ class _MenuListScreenState extends State<MenuListScreen> {
                   child: GridView.builder(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1, // Number of columns in the grid
-                      childAspectRatio: 3 / 1, // Aspect ratio for the items
+                      crossAxisCount: 1,
+                      childAspectRatio: 3 / 1,
                     ),
                     itemCount: menus.length,
                     itemBuilder: (context, index) {
