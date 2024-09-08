@@ -36,7 +36,6 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
       _futureStoreCollections = _storeCollectionRepository
           .getAll(widget.storeId)
           .then((storeCollections) {
-        // Sorting logic
         switch (_sortOption) {
           case 'newest':
             storeCollections.sort(
@@ -110,7 +109,7 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
             style: TextStyle(
                 color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
         content: const Text(
-            'Are you sure you want to delete this store collection?'),
+            'Are you sure you want to change status this collection?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -118,7 +117,7 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Agree', style: TextStyle(color: Colors.green)),
           ),
         ],
       ),
@@ -210,6 +209,11 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                     itemCount: storeCollections.length,
                     itemBuilder: (context, index) {
                       final storeCollection = storeCollections[index];
+
+                      Color backgroundColor = storeCollection.isDeleted
+                          ? Colors.grey[300]!
+                          : Colors.white;
+
                       return Card(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
@@ -217,6 +221,7 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        color: backgroundColor,
                         child: SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

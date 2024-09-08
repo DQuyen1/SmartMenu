@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/display.dart';
+import 'package:smart_menu/presentation/screens/partner/update_productGroup.dart';
 import 'package:smart_menu/repository/display_repository.dart';
 
 class DisplayDetailScreen extends StatefulWidget {
@@ -14,10 +15,13 @@ class DisplayDetailScreen extends StatefulWidget {
 
 class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
   final DisplayRepository _repository = DisplayRepository();
+  List<int> _productGroupIds = [];
+  List<int> _displayItemIds = [];
 
   @override
   void initState() {
     super.initState();
+    _getDisplayDetails();
     HttpOverrides.global = _DevHttpOverrides();
   }
 
@@ -65,95 +69,166 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
     }
   }
 
+  Future<void> _getDisplayDetails() async {
+    final displayId = widget.display.displayId;
+
+    try {
+      final displayDetails = await _repository.getDisplayDetails(displayId);
+
+      if (displayDetails.containsKey('displayItemIds') &&
+          displayDetails.containsKey('productGroupIds')) {
+        print('Display Item IDs: ${displayDetails['displayItemIds']}');
+        print('Product Group IDs: ${displayDetails['productGroupIds']}');
+
+        setState(() {
+          _displayItemIds = List<int>.from(displayDetails['displayItemIds']);
+          _productGroupIds = List<int>.from(displayDetails['productGroupIds']);
+        });
+      } else {
+        throw Exception('Invalid data structure in display details');
+      }
+    } catch (e) {
+      print('Error in _getDisplayDetails: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching display details: $e')),
+      );
+    }
+  }
+
+  void _navigateToSelectProductGroup() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SelectProductGroupScreen(
+          displayItemIds: _displayItemIds,
+          productGroupIds: _productGroupIds,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Display Details'),
+        title: const Text('Display Details',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.teal,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.display.displayImgPath != null &&
-                Uri.tryParse(widget.display.displayImgPath!)?.hasAbsolutePath ==
-                    true)
-              Image.network(
-                widget.display.displayImgPath!,
-                fit: BoxFit.cover,
-              )
-            else
-              Container(
-                width: double.infinity,
-                height: 200,
-                color: Colors.grey.shade300,
-                child: const Icon(
-                  Icons.image,
-                  color: Colors.grey,
-                  size: 100,
-                ),
-              ),
-            const SizedBox(height: 16),
-            if (widget.display.storeDeviceId != null)
-              FutureBuilder<String>(
-                future: _getDeviceName(widget.display.storeDeviceId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Loading device name...');
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text('Device: ${snapshot.data ?? 'No device'}');
-                  }
-                },
-              ),
-            if (widget.display.collectionId != null) const SizedBox(height: 8),
-            if (widget.display.collectionId != null)
-              FutureBuilder<String>(
-                future: _getCollectionName(widget.display.collectionId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Loading collection name...');
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text(
-                        'Collection: ${snapshot.data ?? 'No collection'}');
-                  }
-                },
-              ),
-            if (widget.display.templateId != null) const SizedBox(height: 8),
-            if (widget.display.templateId != null)
-              FutureBuilder<String>(
-                future: _getTemplateName(widget.display.templateId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Loading template name...');
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text('Template: ${snapshot.data ?? 'No template'}');
-                  }
-                },
-              ),
-            if (widget.display.menuId != null) const SizedBox(height: 8),
-            if (widget.display.menuId != null)
-              FutureBuilder<String>(
-                future: _getMenuName(widget.display.menuId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Loading menu name...');
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text('Menu: ${snapshot.data ?? 'No menu'}');
-                  }
-                },
-              ),
+            _buildDisplayImage(),
+            _buildInfoSection(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDisplayImage() {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        image: widget.display.displayImgPath != null &&
+                Uri.tryParse(widget.display.displayImgPath!)?.hasAbsolutePath ==
+                    true
+            ? DecorationImage(
+                image: NetworkImage(widget.display.displayImgPath!),
+                fit: BoxFit.cover,
+              )
+            : null,
+      ),
+      child: widget.display.displayImgPath == null
+          ? Icon(Icons.image, color: Colors.grey.shade400, size: 64)
+          : null,
+    );
+  }
+
+  Widget _buildInfoSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInfoItem(
+              'Device', _getDeviceName(widget.display.storeDeviceId)),
+          if (widget.display.collectionId != null)
+            _buildInfoItem(
+                'Collection', _getCollectionName(widget.display.collectionId))
+          else if (widget.display.menuId != null)
+            _buildInfoItem('Menu', _getMenuName(widget.display.menuId)),
+          _buildInfoItem(
+              'Template', _getTemplateName(widget.display.templateId)),
+          SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _navigateToSelectProductGroup,
+            child: Text('Change Product On Display'),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.teal,
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(String label, Future<String> futureValue) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          SizedBox(height: 4),
+          FutureBuilder<String>(
+            future: futureValue,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Text('Loading...', style: TextStyle(fontSize: 16));
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}',
+                    style: TextStyle(fontSize: 16, color: Colors.red));
+              } else {
+                return Text(
+                  snapshot.data ?? 'Not available',
+                  style: TextStyle(fontSize: 16),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

@@ -26,6 +26,7 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
   String _searchQuery = '';
   int? _selectedCategory;
   bool _isAscendingOrder = true;
+  String _sortOption = 'newest';
 
   @override
   void initState() {
@@ -64,7 +65,39 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
     setState(() {
       _futureProducts =
           _storeMenuRepository.getListProduct(widget.menuId).then((products) {
-        products.sort((a, b) => b.productId.compareTo(a.productId));
+        switch (_sortOption) {
+          case 'newest':
+            products.sort((a, b) => b.productId.compareTo(a.productId));
+            break;
+          case 'oldest':
+            products.sort((a, b) => a.productId.compareTo(b.productId));
+            break;
+          case 'name_asc':
+            products.sort((a, b) => (a.productName.toLowerCase() ?? '')
+                .compareTo(b.productName.toLowerCase() ?? ''));
+            break;
+          case 'name_desc':
+            products.sort((a, b) => (b.productName.toLowerCase() ?? '')
+                .compareTo(a.productName.toLowerCase() ?? ''));
+            break;
+          case 'price_asc':
+            products.sort((a, b) => (a.productSizePrices.first.price ?? 0)
+                .compareTo(b.productSizePrices.first.price ?? 0));
+          case 'price_desc':
+            products.sort((a, b) => (b.productSizePrices.first.price ?? 0)
+                .compareTo(b.productSizePrices.first.price ?? 0));
+          default:
+            products.sort((a, b) => b.productId.compareTo(a.productId));
+        }
+        if (_searchQuery.isNotEmpty) {
+          products = products
+              .where((product) =>
+                  product.productName
+                      .toLowerCase()
+                      .contains(_searchQuery.toLowerCase()) ??
+                  false)
+              .toList();
+        }
         return products;
       });
     });
@@ -97,11 +130,12 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
   }
 
   List<Product> _filterProducts(List<Product> products) {
-    return products
-        .where((product) => product.productName!
-            .toLowerCase()
-            .contains(_searchQuery.toLowerCase()))
-        .toList();
+    if (_selectedCategory != null) {
+      return products
+          .where((product) => product.categoryId == _selectedCategory)
+          .toList();
+    }
+    return products;
   }
 
   @override
@@ -358,29 +392,41 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
               });
             },
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              splashColor: Colors.grey.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(5),
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.only(left: 8),
-                child: Row(
-                  children: [
-                    Text(
-                      "Filter",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w100, fontSize: 16),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.sort, color: Colors.blue),
-                    ),
-                  ],
-                ),
+          SizedBox(width: 16),
+          DropdownButton<String>(
+            value: _sortOption,
+            items: [
+              DropdownMenuItem<String>(
+                value: 'newest',
+                child: Text('Newest'),
               ),
-            ),
+              DropdownMenuItem<String>(
+                value: 'oldest',
+                child: Text('Oldest'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'name_asc',
+                child: Text('Name A-Z'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'name_desc',
+                child: Text('Name Z-A'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'price_asc',
+                child: Text('Price Ascending'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'price_desc',
+                child: Text('Price Descending'),
+              ),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _sortOption = value!;
+                _fetchProducts();
+              });
+            },
           ),
         ],
       ),
@@ -412,6 +458,7 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value;
+                      _fetchProducts();
                     });
                   },
                   style: TextStyle(fontSize: 18),
@@ -425,7 +472,7 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.orange,
+              color: Colors.blue,
               borderRadius: BorderRadius.circular(50),
               boxShadow: [
                 BoxShadow(
@@ -439,8 +486,7 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
               child: InkWell(
                 borderRadius: BorderRadius.circular(50),
                 onTap: () {
-                  // Trigger search
-                  setState(() {});
+                  _fetchProducts();
                 },
                 child: Container(
                   padding: EdgeInsets.all(16),

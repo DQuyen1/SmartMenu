@@ -22,7 +22,7 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
 
   void _fetchDisplay() {
     setState(() {
-      _futureDisplays = _repository.getAll().then((displays) {
+      _futureDisplays = _repository.getAll(widget.storeId).then((displays) {
         displays.sort((a, b) => b.displayId.compareTo(a.displayId));
 
         return displays;
@@ -79,9 +79,9 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
       final success = await _repository.deleteDisplay(displayId);
       _fetchDisplay();
       if (success) {
-        _showSnackBar('Display deleted successfully', Colors.green);
+        _showSnackBar('Failed to delete this display', Colors.red);
       } else {
-        _showSnackBar('Failed to display', Colors.red);
+        _showSnackBar('Display deleted successfully', Colors.green);
       }
     }
   }

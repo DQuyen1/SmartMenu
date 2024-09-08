@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:smart_menu/config/base_service.dart';
 import 'package:smart_menu/models/store_product.dart';
 
@@ -38,14 +39,35 @@ class StoreProductRepository {
     }
   }
 
-  Future<bool> createStoreProduct(Map<String, dynamic> requestBody) async {
+  Future<Map<String, dynamic>> createStoreProduct(
+      Map<String, dynamic> requestBody) async {
     try {
       final response = await service.post('$url/v2', data: requestBody);
 
-      if (response.statusCode == 201) return true;
-      return false;
+      if (response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': 'Store products added successfully'
+        };
+      } else if (response.statusCode == 400) {
+        // Always return a user-friendly message for 400 status
+        return {
+          'success': false,
+          'message': 'This list of products already exists'
+        };
+      }
+      return {'success': false, 'message': 'Failed to add store products'};
     } catch (e) {
-      throw Exception('Error creating store product: $e');
+      if (e is DioException && e.response?.statusCode == 400) {
+        return {
+          'success': false,
+          'message': 'This list of products already exists'
+        };
+      }
+      return {
+        'success': false,
+        'message': 'Error creating store product. Please try again.'
+      };
     }
   }
 

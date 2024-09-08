@@ -23,7 +23,6 @@ class _PaymentWebViewState extends State<PaymentWebView> {
         NavigationDelegate(
           onPageFinished: (String url) {
             if (url.contains('vnp_ResponseCode=00')) {
-              // Payment successful
               Uri uri = Uri.parse(url);
               String? bankCode = uri.queryParameters['vnp_BankCode'];
               Navigator.of(context).pop({
