@@ -1,15 +1,42 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_menu/repository/display_repository.dart';
 
-class TransactionBillScreen extends StatelessWidget {
+class TransactionBillScreen extends StatefulWidget {
   final double amount;
   final String description;
+  final int storeDeviceId;
+  const TransactionBillScreen(
+      {super.key,
+      required this.amount,
+      required this.description,
+      required this.storeDeviceId});
 
-  const TransactionBillScreen({
-    Key? key,
-    required this.amount,
-    required this.description,
-  }) : super(key: key);
+  @override
+  _TransactionBillScreenState createState() => _TransactionBillScreenState();
+}
+
+class _TransactionBillScreenState extends State<TransactionBillScreen> {
+  final DisplayRepository _repository = DisplayRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    HttpOverrides.global = _DevHttpOverrides();
+  }
+
+  Future<String> _getDeviceName(int? storeDeviceId) async {
+    if (storeDeviceId == null) return 'No device';
+
+    try {
+      final deviceName = await _repository.getDeviceName(storeDeviceId);
+      return deviceName;
+    } catch (e) {
+      return 'Error fetching device';
+    }
+  }
 
   String formatAmount(double amount) {
     return NumberFormat.currency(locale: 'vi', symbol: 'VND', decimalDigits: 0)
@@ -73,7 +100,7 @@ class TransactionBillScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          formatAmount(amount),
+                          formatAmount(widget.amount),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -82,31 +109,53 @@ class TransactionBillScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 15),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Description:',
-                          style: TextStyle(
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              description,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.bold,
+                    FutureBuilder<String>(
+                      future: _getDeviceName(widget.storeDeviceId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Loading description...');
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Description: ',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            '${widget.description} for device ',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: snapshot.data ?? 'No device',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -137,5 +186,14 @@ class TransactionBillScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }

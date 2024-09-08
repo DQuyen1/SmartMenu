@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/store_device.dart';
 import 'package:smart_menu/models/subscription.dart';
+import 'package:smart_menu/presentation/screens/device_detail.dart';
 import 'package:smart_menu/presentation/screens/display_device.dart';
 import 'package:smart_menu/presentation/screens/shared/payment_webview.dart';
 import 'package:smart_menu/presentation/screens/transaction_bill.dart';
@@ -27,16 +28,45 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
   late Future<List<StoreDevice>> _futureStoreDevices;
   late TabController _tabController;
   String _searchQuery = '';
+  String _sortOption = 'newest';
 
   void _fetchStoreDevices() {
     setState(() {
       _futureStoreDevices =
           _storeDeviceRepository.getAll(widget.storeId).then((storeDevices) {
-        storeDevices.sort((a, b) => b.storeDeviceId.compareTo(a.storeDeviceId));
+        switch (_sortOption) {
+          case 'newest':
+            storeDevices
+                .sort((a, b) => b.storeDeviceId.compareTo(a.storeDeviceId));
+            break;
+          case 'oldest':
+            storeDevices
+                .sort((a, b) => a.storeDeviceId.compareTo(b.storeDeviceId));
+            break;
+          case 'name_asc':
+            storeDevices.sort((a, b) => (a.storeDeviceName.toLowerCase() ?? '')
+                .compareTo(b.storeDeviceName.toLowerCase() ?? ''));
+            break;
+          case 'name_desc':
+            storeDevices.sort((a, b) => (b.storeDeviceName.toLowerCase() ?? '')
+                .compareTo(a.storeDeviceName.toLowerCase() ?? ''));
+            break;
+          case 'vertical':
+            storeDevices = storeDevices
+                .where((storeDevice) => storeDevice.ratioType == 1)
+                .toList();
+          case 'horizontal':
+            storeDevices = storeDevices
+                .where((storeDevice) => storeDevice.ratioType == 0)
+                .toList();
+          default:
+            storeDevices
+                .sort((a, b) => b.storeDeviceId.compareTo(a.storeDeviceId));
+        }
         if (_searchQuery.isNotEmpty) {
           storeDevices = storeDevices
-              .where((device) =>
-                  device.storeDeviceName
+              .where((storeDevice) =>
+                  storeDevice.storeDeviceName
                       .toLowerCase()
                       .contains(_searchQuery.toLowerCase()) ??
                   false)
@@ -231,8 +261,8 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
         if (transactionSuccess) {
           _showSnackBar('Subscription and transaction recorded successfully',
               Colors.green);
-          _showBillSummary(
-              selectedSubscription!.price, selectedSubscription!.description);
+          _showBillSummary(selectedSubscription!.price,
+              selectedSubscription!.description, storeDeviceId);
         } else {
           _showSnackBar('Failed to record transaction', Colors.orange);
         }
@@ -242,14 +272,14 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
     }
   }
 
-  void _showBillSummary(double amount, String description) {
+  void _showBillSummary(double amount, String description, int storeDeviceId) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TransactionBillScreen(
-          amount: amount,
-          description: description,
-        ),
+            amount: amount,
+            description: description,
+            storeDeviceId: storeDeviceId),
       ),
     );
   }
@@ -350,82 +380,96 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
               final ratioTypeLabel =
                   storeDevice.ratioType == 0 ? 'Horizontal' : 'Vertical';
               return Card(
-                elevation: 5,
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  title: Text(
-                    storeDevice.storeDeviceName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      Text(
-                        'Type: $ratioTypeLabel',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
-                  trailing: isApproved
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () =>
-                                  _subscribeToDevice(storeDevice.storeDeviceId),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                padding: EdgeInsets.symmetric(horizontal: 14),
-                              ),
-                              child: const Text(
-                                'Subscribe',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () =>
-                                  _changeRatioType(storeDevice.storeDeviceId),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () =>
-                                  _deleteStoreDevice(storeDevice.storeDeviceId),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.check,
-                                color: Colors.green,
-                              ),
-                              onPressed: () =>
-                                  _approveDevice(storeDevice.storeDeviceId),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.red),
-                              onPressed: () {
-                                _deleteStoreDevice(storeDevice.storeDeviceId);
-                              },
-                            ),
-                          ],
+                  elevation: 5,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StoreDeviceDetail(
+                              storeDeviceId: storeDevice.storeDeviceId),
                         ),
-                ),
-              );
+                      );
+                    },
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      title: Text(
+                        storeDevice.storeDeviceName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          Text(
+                            'Type: $ratioTypeLabel',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      trailing: isApproved
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () => _subscribeToDevice(
+                                      storeDevice.storeDeviceId),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 14),
+                                  ),
+                                  child: const Text(
+                                    'Subscribe',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => _changeRatioType(
+                                      storeDevice.storeDeviceId),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () => _deleteStoreDevice(
+                                      storeDevice.storeDeviceId),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                  ),
+                                  onPressed: () =>
+                                      _approveDevice(storeDevice.storeDeviceId),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close,
+                                      color: Colors.red),
+                                  onPressed: () {
+                                    _deleteStoreDevice(
+                                        storeDevice.storeDeviceId);
+                                  },
+                                ),
+                              ],
+                            ),
+                    ),
+                  ));
             },
           );
         }
@@ -436,43 +480,109 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
   Widget _buildSearchUI() {
     return Container(
       padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      offset: Offset(0, 2),
-                      blurRadius: 8),
-                ],
-              ),
-              margin: EdgeInsets.only(right: 16, top: 8, bottom: 8),
-              child: Padding(
-                padding:
-                    EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search',
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(40),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        offset: Offset(0, 2),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
-                  onChanged: (value) {
+                  margin: EdgeInsets.only(right: 16),
+                  child: Padding(
+                    padding:
+                        EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search devices...',
+                        border: InputBorder.none,
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                          _fetchStoreDevices();
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButton<String>(
+                  value: _sortOption,
+                  onChanged: (newValue) {
                     setState(() {
-                      _searchQuery = value;
+                      _sortOption = newValue!;
                       _fetchStoreDevices();
                     });
                   },
+                  items: <String>[
+                    'newest',
+                    'oldest',
+                    'name_asc',
+                    'name_desc',
+                    'vertical',
+                    'horizontal'
+                  ].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(_getSortOptionLabel(value)),
+                    );
+                  }).toList(),
+                  hint: const Text('Sort by'),
+                  isExpanded: true,
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  'Filter',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  String _getSortOptionLabel(String sortOption) {
+    switch (sortOption) {
+      case 'newest':
+        return 'Newest';
+      case 'oldest':
+        return 'Oldest';
+      case 'name_asc':
+        return 'Name: A-Z';
+      case 'name_desc':
+        return 'Name: Z-A';
+      case 'vertical':
+        return 'Vertical devices';
+      case 'horizontal':
+        return 'Horizontal devices';
+      default:
+        return 'Sort by';
+    }
   }
 }
 

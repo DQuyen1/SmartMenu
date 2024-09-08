@@ -53,21 +53,13 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
         'categoryId': int.parse(_productIdController.text),
       };
 
-      bool success;
-      if (widget.storeProduct == null) {
-        success = await _repository.createStoreProduct(storeProductData);
-      } else {
-        success = await _repository.updateStoreProduct(
-            widget.storeProduct!.storeProductId, storeProductData as bool);
-      }
+      final result = await _repository.createStoreProduct(storeProductData);
 
-      if (success) {
+      if (result['success']) {
+        _showSnackBar(result['message'], Colors.green);
         Navigator.pop(context, true);
       } else {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(content: Text('Failed to save store product')),
-        // );
-        _showSnackBar('Failed to save store product', Colors.red);
+        _showSnackBar(result['message'], Colors.orange);
       }
     }
   }
@@ -92,9 +84,7 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -122,7 +112,7 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
             children: [
               DropdownButtonFormField<int>(
                 value: widget.storeProduct?.categoryId,
-                hint: const Text('Select Menu'),
+                hint: const Text('Select Category'),
                 items: _cateList?.map((category) {
                   return DropdownMenuItem<int>(
                     value: category.categoryId,
@@ -135,7 +125,7 @@ class _StoreProductFormScreenState extends State<StoreProductFormScreen> {
                   });
                 },
                 decoration: InputDecoration(
-                  labelText: 'Menu',
+                  labelText: 'Category',
                   labelStyle: TextStyle(
                     fontSize: 18,
                     color: Colors.grey[800],

@@ -57,10 +57,22 @@ class StoreCollectionRepository {
     }
   }
 
+  // Future<bool> deleteStoreCollection(int storeCollectionId) async {
+  //   try {
+  //     final response = await service
+  //         .delete('$url/$storeCollectionId', statusCodes: [200, 204]);
+
+  //     if (response.statusCode == 204) return true;
+  //     return false;
+  //   } catch (e) {
+  //     throw Exception('Error deleting store collection: $e');
+  //   }
+  // }
+
   Future<bool> deleteStoreCollection(int storeCollectionId) async {
     try {
       final response = await service
-          .delete('$url/$storeCollectionId', statusCodes: [200, 204]);
+          .delete('$url/$storeCollectionId/v2', statusCodes: [200, 204]);
 
       if (response.statusCode == 204) return true;
       return false;

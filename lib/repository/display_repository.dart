@@ -8,11 +8,13 @@ class DisplayRepository {
 
   final BaseService service = BaseService();
 
-  Future<List<Display>> getAll() async {
+  Future<List<Display>> getAll(int storeId) async {
     try {
-      final response = await service.get('$url/DisplayItems', queryParameters: {
+      final response =
+          await service.get('$url/DisplayItems/v2', queryParameters: {
         'pageNumber': 1,
-        'pageSize': 10,
+        'pageSize': 100,
+        'storeId': storeId,
       });
       log(response.toString());
 
@@ -25,7 +27,7 @@ class DisplayRepository {
             'Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (error) {
-      throw Exception('Error fetching data: $error');
+      throw Exception('Error fetching display: $error');
     }
   }
 
@@ -44,7 +46,7 @@ class DisplayRepository {
       if (response.statusCode == 201) return true;
       return false;
     } catch (e) {
-      throw Exception('Error creating store collection: $e');
+      throw Exception('Error creating display: $e');
     }
   }
 
@@ -69,7 +71,7 @@ class DisplayRepository {
       if (response.statusCode == 204) return true;
       return false;
     } catch (e) {
-      throw Exception('Error deleting store collection: $e');
+      throw Exception('Error deleting display: $e');
     }
   }
 
@@ -99,7 +101,6 @@ class DisplayRepository {
   }
 
   Future<String> getCollectionName(int collectionId) async {
-    final BaseService service = BaseService();
     final url =
         'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Collections?collectionId=$collectionId&pageNumber=1&pageSize=10';
 
@@ -124,7 +125,6 @@ class DisplayRepository {
   }
 
   Future<String> getDeviceName(int storeDeviceId) async {
-    final BaseService service = BaseService();
     final url =
         'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/StoreDevices?storeDeviceId=$storeDeviceId&pageNumber=1&pageSize=10';
 
@@ -149,7 +149,6 @@ class DisplayRepository {
   }
 
   Future<String> getTemplateName(int templateId) async {
-    final BaseService service = BaseService();
     final url =
         'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Templates?templateId=$templateId&pageNumber=1&pageSize=10';
 
@@ -170,6 +169,80 @@ class DisplayRepository {
       }
     } catch (e) {
       throw Exception('Error fetching template name: $e');
+    }
+  }
+
+  Future<bool> updateDisplayProductGroup(
+      int displayItemId, Map<String, dynamic> requestBody) async {
+    final url =
+        'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/DisplayItems';
+    try {
+      final response = await service.put('$url/$displayItemId',
+          data: requestBody, statusCodes: [200, 204], queryParameters: {});
+
+      if (response.statusCode == 204 || response.statusCode == 200) return true;
+      return false;
+    } catch (e) {
+      throw Exception('Error updating store collection: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getDisplayDetails(int displayId) async {
+    final url =
+        'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/DisplayItems?displayId=$displayId&pageNumber=1&pageSize=10';
+    try {
+      final response = await service.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> displays = response.data;
+
+        if (displays.isNotEmpty) {
+          final List<int> displayItemIds = displays
+              .map<int>((item) => item['displayItemId'] as int)
+              .toList();
+
+          final List<int> productGroupIds = displays
+              .map<int>((item) => item['productGroupId'] as int)
+              .toList();
+
+          return {
+            'displayItemIds': displayItemIds,
+            'productGroupIds': productGroupIds,
+          };
+        } else {
+          throw Exception('No valid data found');
+        }
+      } else {
+        throw Exception('Error fetching data: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Error fetching display details: $e');
+      rethrow;
+    }
+  }
+
+  Future<String> getProductGroupName(int productGroupId) async {
+    final url =
+        'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/ProductGroup?productGroupId=$productGroupId&pageNumber=1&pageSize=10';
+
+    try {
+      final response = await service.get(url);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        final List<dynamic> productGroups = response.data;
+
+        if (productGroups.isNotEmpty &&
+            productGroups[0] is Map<String, dynamic>) {
+          final productGroup = productGroups[0] as Map<String, dynamic>;
+          return productGroup['productGroupName'] ?? 'Not found';
+        } else {
+          throw Exception('Invalid data format');
+        }
+      } else {
+        return 'Not found';
+      }
+    } catch (e) {
+      throw Exception('Error fetching product group name: $e');
     }
   }
 }

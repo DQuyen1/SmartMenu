@@ -41,6 +41,9 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
   List<collection_model.Collection>? _collectionList;
   List<template_model.Template>? _templateList;
 
+  int? selectedMenuId;
+  int? selectedCollectionId;
+
   @override
   void initState() {
     super.initState();
@@ -54,8 +57,8 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
     _storeDeviceIdController = TextEditingController(
         text: widget.display?.storeDeviceId.toString() ?? '');
 
-    _menuIdController.addListener(_onMenuIdChanged);
-    _collectionIdController.addListener(_onCollectionIdChanged);
+    selectedMenuId = widget.display?.menuId;
+    selectedCollectionId = widget.display?.collectionId;
 
     _fetchMenus();
     _fetchCollection();
@@ -138,12 +141,8 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
     if (_formKey.currentState!.validate()) {
       final displayData = {
         'storeDeviceId': int.parse(_storeDeviceIdController.text),
-        'menuId': _menuIdController.text.isNotEmpty
-            ? int.parse(_menuIdController.text)
-            : null,
-        'collectionId': _collectionIdController.text.isNotEmpty
-            ? int.parse(_collectionIdController.text)
-            : null,
+        'menuId': selectedMenuId,
+        'collectionId': selectedCollectionId,
         'templateId': int.parse(_templateIdController.text),
         'activeHour': _activeHour,
       };
@@ -184,9 +183,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -211,7 +208,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DropdownButtonFormField<int>(
-                value: widget.display?.menuId,
+                value: selectedMenuId,
                 hint: const Text('Select Menu'),
                 items: _menuList?.map((menu) {
                   return DropdownMenuItem<int>(
@@ -219,11 +216,14 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
                     child: Text(menu.menuName),
                   );
                 }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _menuIdController.text = value.toString();
-                  });
-                },
+                onChanged: selectedCollectionId == null
+                    ? (value) {
+                        setState(() {
+                          selectedMenuId = value;
+                          _menuIdController.text = value?.toString() ?? '';
+                        });
+                      }
+                    : null,
                 decoration: InputDecoration(
                   labelText: 'Menu',
                   labelStyle: TextStyle(
@@ -234,13 +234,57 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: selectedCollectionId != null
+                      ? Colors.grey[300]
+                      : Colors.grey[200],
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 ),
                 validator: (value) {
-                  if (value == null) {
-                    return 'Please select a menu';
+                  if (value == null && selectedCollectionId == null) {
+                    return 'Please select a menu or collection';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<int>(
+                value: selectedCollectionId,
+                hint: const Text('Select Collection'),
+                items: _collectionList?.map((collection) {
+                  return DropdownMenuItem<int>(
+                    value: collection.collectionId,
+                    child: Text(collection.collectionName),
+                  );
+                }).toList(),
+                onChanged: selectedMenuId == null
+                    ? (value) {
+                        setState(() {
+                          selectedCollectionId = value;
+                          _collectionIdController.text =
+                              value?.toString() ?? '';
+                        });
+                      }
+                    : null,
+                decoration: InputDecoration(
+                  labelText: 'Collection',
+                  labelStyle: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[800],
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  filled: true,
+                  fillColor: selectedMenuId != null
+                      ? Colors.grey[300]
+                      : Colors.grey[200],
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                validator: (value) {
+                  if (value == null && selectedMenuId == null) {
+                    return 'Please select a menu or collection';
                   }
                   return null;
                 },
@@ -281,42 +325,6 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-              // DropdownButtonFormField<int>(
-              //   value: widget.display?.collectionId,
-              //   hint: const Text('Select Collection'),
-              //   items: _collectionList?.map((collection) {
-              //     return DropdownMenuItem<int>(
-              //       value: collection.collectionId,
-              //       child: Text(collection.collectionName),
-              //     );
-              //   }).toList(),
-              //   onChanged: (value) {
-              //     setState(() {
-              //       _collectionIdController.text = value.toString();
-              //     });
-              //   },
-              //   decoration: InputDecoration(
-              //     labelText: 'Collection',
-              //     labelStyle: TextStyle(
-              //       fontSize: 18,
-              //       color: Colors.grey[800],
-              //     ),
-              //     border: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(10),
-              //     ),
-              //     filled: true,
-              //     fillColor: Colors.grey[200],
-              //     contentPadding:
-              //         const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              //   ),
-              //   validator: (value) {
-              //     if (value == null) {
-              //       return 'Please select a collection';
-              //     }
-              //     return null;
-              //   },
-              // ),
               const SizedBox(height: 20),
               DropdownButtonFormField<int>(
                 value: widget.display?.templateId,

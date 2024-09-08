@@ -98,10 +98,11 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Store Menu',
+        title: const Text('Change Menu Status',
             style: TextStyle(
                 color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20)),
-        content: const Text('Are you sure you want to delete this store menu?'),
+        content:
+            const Text('Are you sure you want to change status this menu?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -109,7 +110,7 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Agree', style: TextStyle(color: Colors.green)),
           ),
         ],
       ),
@@ -122,7 +123,7 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
         _showSnackBar('Failed', Colors.red);
       } else {
         _fetchStoreMenus();
-        _showSnackBar('Menu deleted successfully', Colors.green);
+        _showSnackBar('Menu turned off successfully', Colors.green);
       }
     }
   }
@@ -203,6 +204,11 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                     itemCount: storeMenus.length,
                     itemBuilder: (context, index) {
                       final storeMenu = storeMenus[index];
+
+                      Color backgroundColor = storeMenu.isDeleted
+                          ? Colors.grey[300]!
+                          : Colors.white;
+
                       return Card(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
@@ -210,6 +216,7 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        color: backgroundColor,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

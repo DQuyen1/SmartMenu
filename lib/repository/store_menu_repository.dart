@@ -57,10 +57,22 @@ class StoreMenuRepository {
     }
   }
 
+  // Future<bool> deleteStoreMenu(int storeMenuId) async {
+  //   try {
+  //     final response =
+  //         await service.delete('$url/$storeMenuId', statusCodes: [200, 204]);
+
+  //     if (response.statusCode == 204) return true;
+  //     return false;
+  //   } catch (e) {
+  //     throw Exception('Error deleting store menu: $e');
+  //   }
+  // }
+
   Future<bool> deleteStoreMenu(int storeMenuId) async {
     try {
       final response =
-          await service.delete('$url/$storeMenuId', statusCodes: [200, 204]);
+          await service.delete('$url/$storeMenuId/v2', statusCodes: [200, 204]);
 
       if (response.statusCode == 204) return true;
       return false;

@@ -169,7 +169,7 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
       if (success) {
         _showSnackBar('Failed to delete product', Colors.red);
       } else {
-        _showSnackBar('Store menu deleted successfully', Colors.green);
+        _showSnackBar('Product deleted successfully', Colors.green);
       }
     }
   }
@@ -564,31 +564,6 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
                 _fetchStoreProduct();
               });
             },
-          ),
-          SizedBox(width: 16),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              splashColor: Colors.grey.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(5),
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.only(left: 8),
-                child: Row(
-                  children: [
-                    Text(
-                      "Filter",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w100, fontSize: 16),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.sort, color: Colors.blue),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ),
         ],
       ),
