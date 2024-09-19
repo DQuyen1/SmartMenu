@@ -56,6 +56,28 @@ class StoreDeviceRepository {
     }
   }
 
+  Future<bool> updateLocation(
+      StoreDevice storeDevice, String newLocation) async {
+    try {
+      final updateDate = {
+        'storeDeviceName': storeDevice.storeDeviceName,
+        'deviceLocation': newLocation,
+        'deviceCode': storeDevice.deviceCode,
+        'deviceWidth': storeDevice.deviceWidth,
+        'deviceHeight': storeDevice.deviceHeight,
+        // 'ratioType': storeDevice.ratioType,
+        'isApproved': storeDevice.isApproved,
+      };
+
+      final response = await service.put('$url/${storeDevice.storeDeviceId}',
+          data: updateDate, statusCodes: [200, 204], queryParameters: {});
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      ('Error updating location: $e');
+      return false;
+    }
+  }
+
   Future<bool> deleteStoreDevice(int storeDeviceId) async {
     try {
       final response =
@@ -219,6 +241,50 @@ class StoreDeviceRepository {
       }
     } catch (e) {
       throw Exception('Error fetching device name: $e');
+    }
+  }
+
+  Future<bool> checkSubscription(int storeDeviceId) async {
+    try {
+      final response =
+          await service.get('$url/isSubscription?storeDeviceId=$storeDeviceId');
+
+      if (response.statusCode == 200) return response.data as bool;
+      return false;
+    } catch (e) {
+      throw Exception('Error checking subscription');
+    }
+  }
+
+  Future<List<StoreDevice>> getSubscribedDevices(int storeId) async {
+    try {
+      final response = await service.get(url, queryParameters: {
+        'pageNumber': 1,
+        'pageSize': 10,
+        'storeId': storeId,
+      });
+      if (response.statusCode == 200) {
+        final List<dynamic> storeDevices = response.data;
+
+        List<StoreDevice> devices = storeDevices
+            .map((storeDevice) => StoreDevice.fromJson(storeDevice))
+            .toList();
+
+        List<StoreDevice> subscribedDevices = [];
+        for (var device in devices) {
+          bool isSubscribed = await checkSubscription(device.storeDeviceId);
+          if (isSubscribed) {
+            subscribedDevices.add(device);
+          }
+        }
+
+        return subscribedDevices;
+      } else {
+        throw Exception(
+            'Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error fetching subscribed devices: $error');
     }
   }
 }

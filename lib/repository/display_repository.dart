@@ -63,6 +63,30 @@ class DisplayRepository {
     }
   }
 
+  Future<bool> updateActiveHour(Display display, double newActiveHour) async {
+    try {
+      final updateData = {
+        'menuId': display.menuId,
+        'collectionId': display.collectionId,
+        'templateId': display.templateId,
+        'activeHour': newActiveHour,
+        'storeDeviceId': display.storeDeviceId,
+      };
+
+      final response = await service.put(
+        '$url/${display.displayId}',
+        data: updateData,
+        statusCodes: [200, 204],
+        queryParameters: {},
+      );
+
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      print('Error updating active hour: $e');
+      return false;
+    }
+  }
+
   Future<bool> deleteDisplay(int displayId) async {
     try {
       final response =

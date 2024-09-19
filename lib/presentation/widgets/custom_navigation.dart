@@ -51,8 +51,9 @@ class NavigatorProviderState extends State<NavigatorProvider> {
       body: IndexedStack(
         index: currentPageIndex,
         children: const <Widget>[
-          DashboardScreen(
+          DashBoardScreen(
             userId: '',
+            token: '',
             brandId: 0,
             storeId: 0,
           ),

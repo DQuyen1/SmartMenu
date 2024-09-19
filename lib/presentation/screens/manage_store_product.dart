@@ -361,17 +361,17 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
                                                         storeProduct),
                                               ),
                                               const SizedBox(height: 10),
-                                              InkWell(
-                                                onTap: () {
-                                                  _navigateToStoreProductForm(
-                                                      storeProduct:
-                                                          storeProduct);
-                                                },
-                                                child: const Icon(
-                                                  Icons.edit,
-                                                  color: Colors.blue,
-                                                ),
-                                              ),
+                                              // InkWell(
+                                              //   onTap: () {
+                                              //     _navigateToStoreProductForm(
+                                              //         storeProduct:
+                                              //             storeProduct);
+                                              //   },
+                                              //   child: const Icon(
+                                              //     Icons.edit,
+                                              //     color: Colors.blue,
+                                              //   ),
+                                              // ),
                                               const SizedBox(height: 10),
                                               InkWell(
                                                 onTap: () {

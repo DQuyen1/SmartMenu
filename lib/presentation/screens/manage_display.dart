@@ -86,6 +86,29 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
     }
   }
 
+  Future<void> _updateActiveHour(Display display) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: display.activeHour!.toInt(),
+        minute: ((display.activeHour! % 1) * 60).toInt(),
+      ),
+    );
+
+    if (pickedTime != null) {
+      final newActiveHour = pickedTime.hour + (pickedTime.minute / 60);
+      final success =
+          await _repository.updateActiveHour(display, newActiveHour);
+
+      if (success) {
+        _showSnackBar('Active hour updated successfully', Colors.green);
+        _fetchDisplay();
+      } else {
+        _showSnackBar('Failed to update active hour', Colors.red);
+      }
+    }
+  }
+
   void _showSnackBar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -387,11 +410,16 @@ class _DisplayListScreenState extends State<DisplayListScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.blue),
-                                  onPressed: () =>
-                                      _navigateToDisplayForm(display: display),
+                                  icon: const Icon(Icons.access_time,
+                                      color: Colors.orange),
+                                  onPressed: () => _updateActiveHour(display),
                                 ),
+                                // IconButton(
+                                //   icon: const Icon(Icons.edit,
+                                //       color: Colors.blue),
+                                //   onPressed: () =>
+                                //       _navigateToDisplayForm(display: display),
+                                // ),
                                 IconButton(
                                   icon: const Icon(Icons.delete,
                                       color: Colors.red),

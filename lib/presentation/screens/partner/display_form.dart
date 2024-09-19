@@ -87,7 +87,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
   Future<void> _fetchDevice() async {
     try {
       final deviceRepository = StoreDeviceRepository();
-      _deviceList = await deviceRepository.getAll(widget.storeId);
+      _deviceList = await deviceRepository.getSubscribedDevices(widget.storeId);
       setState(() {});
     } catch (e) {
       _showSnackBar('Failed to fetch menus: $e', Colors.red);
