@@ -1,7 +1,28 @@
 import 'package:dio/dio.dart';
+import 'package:smart_menu/repository/auth_repository.dart';
 
 class BaseService {
   final Dio _dio = Dio();
+
+  BaseService() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await AuthManager().getToken();
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+        onError: (DioError e, handler) async {
+          if (e.response?.statusCode == 401) {
+            await AuthManager().clearToken();
+          }
+          return handler.next(e);
+        },
+      ),
+    );
+  }
 
   Future<Response> get<T>(
     String uri, {
@@ -20,7 +41,6 @@ class BaseService {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
       );
-
       return response;
     } catch (e) {
       rethrow;

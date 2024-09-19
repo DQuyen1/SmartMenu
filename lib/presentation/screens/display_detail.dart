@@ -179,6 +179,8 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
             _buildInfoItem('Menu', _getMenuName(widget.display.menuId)),
           _buildInfoItem(
               'Template', _getTemplateName(widget.display.templateId)),
+          _buildInfoItem('Display Time',
+              Future.value(widget.display.activeHour.toString())),
           SizedBox(height: 24),
           ElevatedButton(
             onPressed: _navigateToSelectProductGroup,

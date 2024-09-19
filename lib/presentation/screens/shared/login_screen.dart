@@ -4,7 +4,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smart_menu/presentation/screens/partner/dashboard.dart';
+import 'package:smart_menu/presentation/screens/shared/forgot_password.dart';
 import 'package:smart_menu/presentation/widgets/custom_text_field.dart';
+import 'package:smart_menu/repository/auth_repository.dart';
+import 'package:smart_menu/repository/reset_password_handler.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,11 +21,17 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final _passwordResetHandler = PasswordResetHandler();
 
   @override
   void initState() {
     super.initState();
     HttpOverrides.global = _DevHttpOverrides();
+    _initUniLinks();
+  }
+
+  void _initUniLinks() async {
+    await _passwordResetHandler.initUniLinks(context);
   }
 
   void handlerForm() async {
@@ -56,11 +65,17 @@ class _LoginScreenState extends State<LoginScreen> {
           final roleId = responseData['roleId'].toString();
           final storeId = responseData['storeId'].toString();
 
+          print("Token being stored: $token");
+          await AuthManager().setToken(token);
+
           await _storage.write(key: 'userId', value: userId);
           await _storage.write(key: 'token', value: token);
           await _storage.write(key: 'brandId', value: brandId);
           await _storage.write(key: 'roleId', value: roleId);
           await _storage.write(key: 'storeId', value: storeId);
+
+          String? storedToken = await AuthManager().getToken();
+          print("Token retrieved: $storedToken");
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -70,8 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => DashboardScreen(
+              builder: (context) => DashBoardScreen(
                 userId: userId,
+                token: token,
                 brandId: int.parse(brandId),
                 storeId: int.parse(storeId),
               ),
@@ -203,11 +219,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: () {
-                            // Navigate to sign-up screen (if implemented)
-                          },
+                          onTap: () {},
                           child: const Text(
                             "Don't have any account? Sign Up",
+                            style: TextStyle(
+                              color: Colors.black,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ForgotPasswordPage()),
+                            );
+                          },
+                          child: const Text(
+                            "Forgot password?",
                             style: TextStyle(
                               color: Colors.black,
                               decoration: TextDecoration.underline,

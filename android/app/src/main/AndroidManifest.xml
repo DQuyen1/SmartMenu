@@ -23,8 +23,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
-        <activity
+            <!-- <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                android:scheme="https"
+                android:host="smartmenuweb.netlify.app"
+                android:pathPrefix="/pages/reset-password" />
+            </intent-filter> -->
+    </activity>
+    <activity
     android:name="com.vnpay.flutter.VnpayReturnActivity"
     android:exported="true">
     <intent-filter>

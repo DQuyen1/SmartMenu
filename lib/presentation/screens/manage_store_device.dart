@@ -51,14 +51,14 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
             storeDevices.sort((a, b) => (b.storeDeviceName.toLowerCase() ?? '')
                 .compareTo(a.storeDeviceName.toLowerCase() ?? ''));
             break;
-          case 'vertical':
-            storeDevices = storeDevices
-                .where((storeDevice) => storeDevice.ratioType == 1)
-                .toList();
-          case 'horizontal':
-            storeDevices = storeDevices
-                .where((storeDevice) => storeDevice.ratioType == 0)
-                .toList();
+          // case 'vertical':
+          //   storeDevices = storeDevices
+          //       .where((storeDevice) => storeDevice.ratioType == 1)
+          //       .toList();
+          // case 'horizontal':
+          //   storeDevices = storeDevices
+          //       .where((storeDevice) => storeDevice.ratioType == 0)
+          //       .toList();
           default:
             storeDevices
                 .sort((a, b) => b.storeDeviceId.compareTo(a.storeDeviceId));
@@ -160,15 +160,15 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
     }
   }
 
-  void _changeRatioType(int storeDeviceId) async {
-    final success = await _storeDeviceRepository.changeRatioType(storeDeviceId);
-    if (success) {
-      _fetchStoreDevices();
-      _showSnackBar('Ratio type changed successfully', Colors.green);
-    } else {
-      _showSnackBar('Failed to change ratio type', Colors.red);
-    }
-  }
+  // void _changeRatioType(int storeDeviceId) async {
+  //   final success = await _storeDeviceRepository.changeRatioType(storeDeviceId);
+  //   if (success) {
+  //     _fetchStoreDevices();
+  //     _showSnackBar('Ratio type changed successfully', Colors.green);
+  //   } else {
+  //     _showSnackBar('Failed to change ratio type', Colors.red);
+  //   }
+  // }
 
   void _subscribeToDevice(int storeDeviceId) async {
     final subscriptions = await _subscriptionRepository.getAll();
@@ -323,6 +323,45 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
     );
   }
 
+  Future<void> _updateDeviceLocation(StoreDevice storeDevice) async {
+    final TextEditingController locationController = TextEditingController();
+    locationController.text = storeDevice.deviceLocation ?? '';
+    final newLocation = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Update Device Location'),
+          content: TextField(
+            controller: locationController,
+            decoration: InputDecoration(hintText: "Enter new location"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              child: Text('Update'),
+              onPressed: () =>
+                  Navigator.of(context).pop(locationController.text),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (newLocation != null && newLocation.isNotEmpty) {
+      final success =
+          await _storeDeviceRepository.updateLocation(storeDevice, newLocation);
+      if (success) {
+        _showSnackBar('Location updated successfully', Colors.green);
+        _fetchStoreDevices();
+      } else {
+        _showSnackBar('Failed to update location', Colors.red);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -377,99 +416,117 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
             itemCount: storeDevices.length,
             itemBuilder: (context, index) {
               final storeDevice = storeDevices[index];
-              final ratioTypeLabel =
-                  storeDevice.ratioType == 0 ? 'Horizontal' : 'Vertical';
+              // final ratioTypeLabel =
+              //     storeDevice.ratioType == 0 ? 'Horizontal' : 'Vertical';
               return Card(
-                  elevation: 5,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StoreDeviceDetail(
-                              storeDeviceId: storeDevice.storeDeviceId),
-                        ),
-                      );
-                    },
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      title: Text(
-                        storeDevice.storeDeviceName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                elevation: 5,
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StoreDeviceDetail(
+                            storeDeviceId: storeDevice.storeDeviceId),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          Text(
-                            'Type: $ratioTypeLabel',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      trailing: isApproved
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () => _subscribeToDevice(
-                                      storeDevice.storeDeviceId),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 14),
-                                  ),
-                                  child: const Text(
-                                    'Subscribe',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w400),
-                                  ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                storeDevice.storeDeviceName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _changeRatioType(
-                                      storeDevice.storeDeviceId),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () => _deleteStoreDevice(
-                                      storeDevice.storeDeviceId),
-                                ),
-                              ],
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                  ),
-                                  onPressed: () =>
-                                      _approveDevice(storeDevice.storeDeviceId),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.close,
-                                      color: Colors.red),
-                                  onPressed: () {
-                                    _deleteStoreDevice(
-                                        storeDevice.storeDeviceId);
-                                  },
-                                ),
-                              ],
+                              ),
                             ),
+                            if (isApproved)
+                              PopupMenuButton<String>(
+                                icon: const Icon(Icons.more_vert),
+                                onSelected: (String result) {
+                                  switch (result) {
+                                    case 'subscribe':
+                                      _subscribeToDevice(
+                                          storeDevice.storeDeviceId);
+                                      break;
+                                    case 'location':
+                                      _updateDeviceLocation(storeDevice);
+                                      break;
+                                    case 'ratio':
+                                      // _changeRatioType(
+                                      //     storeDevice.storeDeviceId);
+                                      break;
+                                    case 'delete':
+                                      _deleteStoreDevice(
+                                          storeDevice.storeDeviceId);
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) =>
+                                    <PopupMenuEntry<String>>[
+                                  const PopupMenuItem<String>(
+                                    value: 'subscribe',
+                                    child: Text('Subscribe'),
+                                  ),
+                                  const PopupMenuItem<String>(
+                                    value: 'location',
+                                    child: Text('Update Location'),
+                                  ),
+                                  const PopupMenuItem<String>(
+                                    value: 'ratio',
+                                    child: Text('Change Ratio Type'),
+                                  ),
+                                  const PopupMenuItem<String>(
+                                    value: 'delete',
+                                    child: Text('Delete'),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.check,
+                                        color: Colors.green),
+                                    onPressed: () => _approveDevice(
+                                        storeDevice.storeDeviceId),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.close,
+                                        color: Colors.red),
+                                    onPressed: () => _deleteStoreDevice(
+                                        storeDevice.storeDeviceId),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Width: ${storeDevice.deviceWidth}, Height: ${storeDevice.deviceHeight}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        // Text(
+                        //   'Type: $ratioTypeLabel',
+                        //   style: const TextStyle(fontSize: 14),
+                        // ),
+                        Text(
+                          'Location: ${storeDevice.deviceLocation ?? "Not set"}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
                     ),
-                  ));
+                  ),
+                ),
+              );
             },
           );
         }
@@ -536,8 +593,8 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
                     'oldest',
                     'name_asc',
                     'name_desc',
-                    'vertical',
-                    'horizontal'
+                    // 'vertical',
+                    // 'horizontal'
                   ].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
