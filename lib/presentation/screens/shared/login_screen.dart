@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smart_menu/presentation/screens/partner/dashboard.dart';
 import 'package:smart_menu/presentation/screens/shared/forgot_password.dart';
+import 'package:smart_menu/presentation/widgets/custom_navigation.dart';
 import 'package:smart_menu/presentation/widgets/custom_text_field.dart';
 import 'package:smart_menu/repository/auth_repository.dart';
 import 'package:smart_menu/repository/reset_password_handler.dart';
@@ -21,18 +22,18 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final _passwordResetHandler = PasswordResetHandler();
+  // final _passwordResetHandler = PasswordResetHandler();
 
   @override
   void initState() {
     super.initState();
     HttpOverrides.global = _DevHttpOverrides();
-    _initUniLinks();
+    // _initUniLinks();
   }
 
-  void _initUniLinks() async {
-    await _passwordResetHandler.initUniLinks(context);
-  }
+  // void _initUniLinks() async {
+  //   await _passwordResetHandler.initUniLinks(context);
+  // }
 
   void handlerForm() async {
     if (_formKey.currentState!.validate()) {
@@ -75,24 +76,38 @@ class _LoginScreenState extends State<LoginScreen> {
           await _storage.write(key: 'storeId', value: storeId);
 
           String? storedToken = await AuthManager().getToken();
+          // print("user: $userId");
           print("Token retrieved: $storedToken");
+          // print("brand id : $brandId");
+          // print("role id: $roleId");
+          // print("store id: $storeId");
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Login successful!'),
-            ),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashBoardScreen(
-                userId: userId,
-                token: token,
-                brandId: int.parse(brandId),
-                storeId: int.parse(storeId),
+          if (roleId == '2') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Login successful!'),
+                backgroundColor: Colors.green,
               ),
-            ),
-          );
+            );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DashBoardScreen(
+                  userId: userId,
+                  token: token,
+                  brandId: int.parse(brandId),
+                  storeId: int.parse(storeId),
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('You do not have access to this application'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Incorrect username or password')),
@@ -102,8 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
         print('HandshakeException: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text(
-                  'Error connecting to server. Please check your network connection.')),
+            content: Text(
+                'Error connecting to server. Please check your network connection.'),
+          ),
         );
       } catch (e) {
         print('Error during login: $e');
@@ -218,16 +234,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        GestureDetector(
-                          onTap: () {},
-                          child: const Text(
-                            "Don't have any account? Sign Up",
-                            style: TextStyle(
-                              color: Colors.black,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
+                        // GestureDetector(
+                        //   onTap: () {},
+                        //   child: const Text(
+                        //     "Don't have any account? Sign Up",
+                        //     style: TextStyle(
+                        //       color: Colors.black,
+                        //       decoration: TextDecoration.underline,
+                        //     ),
+                        //   ),
+                        // ),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(

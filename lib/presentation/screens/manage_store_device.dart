@@ -405,7 +405,8 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          // return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(child: Text(''));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('No devices found'));
         } else {
@@ -480,10 +481,10 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen>
                                     value: 'location',
                                     child: Text('Update Location'),
                                   ),
-                                  const PopupMenuItem<String>(
-                                    value: 'ratio',
-                                    child: Text('Change Ratio Type'),
-                                  ),
+                                  // const PopupMenuItem<String>(
+                                  //   value: 'ratio',
+                                  //   child: Text('Change Ratio Type'),
+                                  // ),
                                   const PopupMenuItem<String>(
                                     value: 'delete',
                                     child: Text('Delete'),

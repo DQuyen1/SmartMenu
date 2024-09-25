@@ -89,11 +89,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             ),
           ),
         ),
-        body: Column(
-          children: [
-            _buildSearchUI(),
-            Expanded(
-              child: FutureBuilder<List<Template>>(
+        body: SingleChildScrollView(
+          // Wrap here
+          child: Column(
+            children: [
+              _buildSearchUI(),
+              FutureBuilder<List<Template>>(
                 future: _futureTemplates,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -111,6 +112,10 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         childAspectRatio: 3 / 1,
                       ),
                       itemCount: templates.length,
+                      physics:
+                          const NeverScrollableScrollPhysics(), // Disable scrolling for GridView
+                      shrinkWrap:
+                          true, // Allow GridView to take the height of its children
                       itemBuilder: (context, index) {
                         final template = templates[index];
                         return Card(
@@ -124,18 +129,32 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ListTile(
-                                title: Text(template.templateName,
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
-                                subtitle: Text(template.templateDescription,
-                                    style: const TextStyle(
-                                        fontSize: 16, color: Colors.grey)),
+                                title: Text(
+                                  template.templateName,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  template.templateDescription,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                                 leading: Image.network(
-                                  template.templateImgPath,
+                                  template.templateImgPath ?? '',
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 50,
+                                      height: 50,
+                                      color: Colors.grey,
+                                    );
+                                  },
                                 ),
                                 onTap: () {},
                               ),
@@ -147,8 +166,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   }
                 },
               ),
-            )
-          ],
+            ],
+          ),
         ));
   }
 

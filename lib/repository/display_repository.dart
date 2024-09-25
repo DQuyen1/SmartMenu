@@ -207,7 +207,7 @@ class DisplayRepository {
       if (response.statusCode == 204 || response.statusCode == 200) return true;
       return false;
     } catch (e) {
-      throw Exception('Error updating store collection: $e');
+      throw Exception('Error updating product group: $e');
     }
   }
 

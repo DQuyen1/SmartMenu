@@ -18,8 +18,8 @@ class AuthManager {
     return await _storage.read(key: 'token');
   }
 
-  Future<void> clearToken() async {
-    _token = null;
-    await _storage.delete(key: 'token');
-  }
+  // Future<void> clearToken() async {
+  //   _token = null;
+  //   await _storage.delete(key: 'token');
+  // }
 }

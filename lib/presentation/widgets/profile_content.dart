@@ -1,6 +1,9 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:smart_menu/config/app_router.dart';
 import 'package:smart_menu/config/constants.dart';
+import 'package:smart_menu/config/custom_navigator.dart';
 
 class ProfileContent extends StatefulWidget {
   final String name;
@@ -13,10 +16,18 @@ class ProfileContent extends StatefulWidget {
 }
 
 class _ProfileContentState extends State<ProfileContent> {
+  static const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  final CustomNavigator navigator = CustomNavigator();
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        if (widget.name == 'Signout') {
+          navigator.navigateTo(context, AppRouter.home);
+          secureStorage.deleteAll();
+        }
+
         log('Pressed');
       },
       child: ClipRRect(

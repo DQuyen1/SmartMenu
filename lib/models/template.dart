@@ -5,7 +5,7 @@ class Template {
   final String templateDescription;
   final int templateWidth;
   final int templateHeight;
-  final String templateImgPath;
+  final String? templateImgPath;
   final List<dynamic>? layers;
   final bool isDeleted;
 
