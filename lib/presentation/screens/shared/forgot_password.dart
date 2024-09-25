@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_menu/presentation/screens/shared/login_screen.dart';
 import 'package:smart_menu/repository/reset_password_handler.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -15,17 +16,52 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Forgot Password')),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Image.network(
+                'https://www.nicepng.com/png/detail/336-3367463_password-reset-ad-password-reset-icon.png',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
+              const SizedBox(height: 25),
+              const Text(
+                "Forgot Password",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  hintText: 'E-mail',
+                  prefixIcon: Icon(
+                    Icons.email,
+                    color: Colors.black54,
+                  ),
+                  labelStyle: TextStyle(color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.black87),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
                 keyboardType: TextInputType.emailAddress,
+                style: TextStyle(color: Colors.black),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -37,17 +73,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _submitForgotPassword,
-                      child: Text('Send Reset Link'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Color.fromARGB(255, 50, 132, 186),
-                      ),
-                    ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _submitForgotPassword,
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Next'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black,
+                  minimumSize: const Size(200, 50),
+                ),
+              ),
             ],
           ),
         ),
@@ -63,13 +100,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       try {
         final result = await _passwordResetHandler
             .sendForgotPasswordRequest(_emailController.text);
+        print('Reset request result: $result');
         if (result == 'Success') {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Password reset link sent to your email')),
+            SnackBar(
+              content: Text('Please check your mail to change password'),
+              backgroundColor: Colors.green,
+            ),
           );
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => LoginScreen()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result)),
+            SnackBar(content: Text(result as String)),
           );
         }
       } finally {

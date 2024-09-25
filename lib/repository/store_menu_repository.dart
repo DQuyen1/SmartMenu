@@ -84,12 +84,13 @@ class StoreMenuRepository {
   Future<List<Product>> getListProduct(int menuId) async {
     try {
       final response = await service.get(
-          'http://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Products/menu-collection?menuId=$menuId',
-          queryParameters: {
-            'pageNumber': 1,
-            'pageSize': 10,
-            'menuId': menuId,
-          });
+        'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Products/menu-collection?menuId=${menuId}',
+        queryParameters: {
+          'pageNumber': 1,
+          'pageSize': 10,
+          'menuId': menuId,
+        },
+      );
       if (response.statusCode == 200) {
         final List<dynamic> products = response.data;
         return products.map((product) => Product.fromJson(product)).toList();

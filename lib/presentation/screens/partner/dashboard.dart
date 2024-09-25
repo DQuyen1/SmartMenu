@@ -8,7 +8,9 @@ import 'package:smart_menu/presentation/screens/manage_store_device.dart';
 import 'package:smart_menu/presentation/screens/manage_store_menu.dart';
 import 'package:smart_menu/presentation/screens/manage_store_product.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:smart_menu/presentation/widgets/custom_navigation.dart';
 import 'package:smart_menu/repository/store_product_repository.dart';
+import 'package:smart_menu/presentation/screens/shared/navbar.dart';
 
 class DashBoardScreen extends StatefulWidget {
   final String userId;
@@ -28,6 +30,7 @@ class DashBoardScreen extends StatefulWidget {
 }
 
 class _DashBoardScreenState extends State<DashBoardScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<StoreProduct> _storeProducts = [];
   bool _isLoading = true;
 
@@ -57,15 +60,22 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.green.shade800,
-        elevation: 0,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-        ),
-      ),
+          title: const Text('Home Screen'),
+          backgroundColor: Colors.green.shade800,
+          elevation: 0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              _scaffoldKey.currentState?.openDrawer();
+            },
+          )),
+      drawer: NavBar(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -140,7 +150,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
           children: [
             _buildManageButton(
                 context,
-                "Manage Template",
+                "View Template",
                 Icons.description,
                 Colors.green,
                 () => Navigator.push(

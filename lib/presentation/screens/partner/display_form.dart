@@ -69,7 +69,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
   Future<void> _fetchCollection() async {
     try {
       final collectionRepository = CollectionRepository();
-      _collectionList = await collectionRepository.getAll(widget.storeId);
+      _collectionList = await collectionRepository.getAll(widget.brandId);
       setState(() {});
     } catch (e) {}
   }
@@ -77,7 +77,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
   Future<void> _fetchMenus() async {
     try {
       final menuRepository = MenuRepository();
-      _menuList = await menuRepository.getAll(widget.storeId);
+      _menuList = await menuRepository.getAll(widget.brandId);
       setState(() {});
     } catch (e) {
       _showSnackBar('Failed to fetch menus: $e', Colors.red);

@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:smart_menu/config/app_router.dart';
+import 'package:smart_menu/config/custom_navigator.dart';
 import 'package:smart_menu/presentation/screens/display_image.dart';
 import 'package:smart_menu/presentation/screens/display_image.dart';
 import 'package:smart_menu/presentation/screens/partner/display_device_form.dart';
@@ -16,11 +18,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'My App',
+      routes: AppRouter.getRoutes(),
+      initialRoute: AppRouter.home,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
     );
   }
 }

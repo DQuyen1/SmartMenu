@@ -84,7 +84,7 @@ class StoreCollectionRepository {
   Future<List<Product>> getListProduct(int collectionId) async {
     try {
       final response = await service.get(
-          'http://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Products/menu-collection?menuId=$collectionId',
+          'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Products/menu-collection?menuId=$collectionId',
           queryParameters: {
             'pageNumber': 1,
             'pageSize': 10,

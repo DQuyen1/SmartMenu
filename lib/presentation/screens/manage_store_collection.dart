@@ -185,11 +185,13 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          _buildSearchUI(),
-          Expanded(
-            child: FutureBuilder<List<StoreCollection>>(
+      body: SingleChildScrollView(
+        // Wrap here
+        child: Column(
+          children: [
+            _buildSearchUI(),
+            // Removed Expanded, since it's in a scrollable view
+            FutureBuilder<List<StoreCollection>>(
               future: _futureStoreCollections,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -207,6 +209,10 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                       childAspectRatio: 3 / 1,
                     ),
                     itemCount: storeCollections.length,
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Disable scrolling for GridView
+                    shrinkWrap:
+                        true, // Allow GridView to take the height of its children
                     itemBuilder: (context, index) {
                       final storeCollection = storeCollections[index];
 
@@ -228,14 +234,19 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                             children: [
                               ListTile(
                                 title: Text(
-                                    '${storeCollection.collection?.collectionName}',
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
+                                  '${storeCollection.collection?.collectionName}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 subtitle: Text(
-                                    'Description: ${storeCollection.collection?.collectionDescription}',
-                                    style: const TextStyle(
-                                        fontSize: 16, color: Colors.grey)),
+                                  'Description: ${storeCollection.collection?.collectionDescription}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -247,13 +258,13 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                                         _navigateToCollectionDetail(
                                             storeCollection.collectionId),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit,
-                                        color: Colors.blue),
-                                    onPressed: () =>
-                                        _navigateToStoreCollectionForm(
-                                            storeCollection: storeCollection),
-                                  ),
+                                  // IconButton(
+                                  //   icon: const Icon(Icons.edit,
+                                  //       color: Colors.blue),
+                                  //   onPressed: () =>
+                                  //       _navigateToStoreCollectionForm(
+                                  //           storeCollection: storeCollection),
+                                  // ),
                                   IconButton(
                                     icon: const Icon(Icons.delete,
                                         color: Colors.red),
@@ -271,14 +282,14 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                 }
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToStoreCollectionForm(),
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _navigateToStoreCollectionForm(),
+      //   backgroundColor: Colors.green,
+      //   child: const Icon(Icons.add, color: Colors.white),
+      // ),
     );
   }
 

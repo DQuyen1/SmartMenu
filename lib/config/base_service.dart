@@ -2,8 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:smart_menu/repository/auth_repository.dart';
 
 class BaseService {
-  final Dio _dio = Dio();
-
+  final Dio _dio = Dio(BaseOptions(
+    connectTimeout: Duration(seconds: 5), // 5 seconds
+    receiveTimeout: Duration(seconds: 5), // 5 seconds
+  ));
   BaseService() {
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -16,7 +18,8 @@ class BaseService {
         },
         onError: (DioError e, handler) async {
           if (e.response?.statusCode == 401) {
-            await AuthManager().clearToken();
+            final token = await AuthManager().getToken();
+            print(token);
           }
           return handler.next(e);
         },

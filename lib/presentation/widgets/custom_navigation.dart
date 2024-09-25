@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smart_menu/presentation/screens/partner/dashboard.dart';
-import 'package:smart_menu/presentation/screens/shared/login_screen.dart';
 import 'package:smart_menu/presentation/screens/shared/profile.dart';
 
 class NavigatorProvider extends StatefulWidget {
@@ -11,13 +11,35 @@ class NavigatorProvider extends StatefulWidget {
 }
 
 class NavigatorProviderState extends State<NavigatorProvider> {
-  // Initial page index set to display NavigatorProvider on first launch
+  // Initial page index
   int currentPageIndex = 0;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  String? userId;
+  String? token;
+  String? brandId;
+  String? roleId;
+  String? storeId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStorageValues();
+  }
+
+  Future<void> _loadStorageValues() async {
+    userId = await _storage.read(key: 'userId');
+    token = await _storage.read(key: 'token');
+    brandId = await _storage.read(key: 'brandId');
+    roleId = await _storage.read(key: 'roleId');
+    storeId = await _storage.read(key: 'storeId');
+
+    // Update the state to reflect the new values
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    // final ThemeData theme = Theme.of(context);
-
     return Scaffold(
       bottomNavigationBar: currentPageIndex != 1
           ? NavigationBar(
@@ -35,12 +57,8 @@ class NavigatorProviderState extends State<NavigatorProvider> {
                   label: 'Home',
                 ),
                 NavigationDestination(
-                  icon: Badge(child: Icon(Icons.notifications_sharp)),
-                  label: 'Notifications',
-                ),
-                NavigationDestination(
                   icon: Badge(
-                    label: Text('2'),
+                    // label: Text('2'),
                     child: Icon(Icons.account_circle),
                   ),
                   label: 'Profile',
@@ -50,14 +68,13 @@ class NavigatorProviderState extends State<NavigatorProvider> {
           : null,
       body: IndexedStack(
         index: currentPageIndex,
-        children: const <Widget>[
+        children: <Widget>[
           DashBoardScreen(
-            userId: '',
-            token: '',
-            brandId: 0,
-            storeId: 0,
+            userId: userId ?? '',
+            token: token ?? '',
+            brandId: int.tryParse(brandId ?? '0') ?? 0,
+            storeId: int.tryParse(storeId ?? '0') ?? 0,
           ),
-          ProfileScreen(),
         ],
       ),
     );

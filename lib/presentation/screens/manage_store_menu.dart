@@ -180,11 +180,11 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          _buildSearchUI(),
-          Expanded(
-            child: FutureBuilder<List<StoreMenu>>(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildSearchUI(),
+            FutureBuilder<List<StoreMenu>>(
               future: _futureStoreMenus,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -192,10 +192,12 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No store menus found'));
+                  return const Center(child: Text('No menus found'));
                 } else {
                   final storeMenus = snapshot.data!;
                   return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 1,
@@ -217,45 +219,45 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         color: backgroundColor,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.restaurant,
-                                  size: 40, color: Colors.orange),
-                              title: Text('${storeMenu.menu?.menuName}',
-                                  style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
-                              subtitle: Text(
-                                  'Description: ${storeMenu.menu?.menuDescription}',
-                                  style: const TextStyle(
-                                      fontSize: 16, color: Colors.grey)),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.view_agenda,
-                                      color: Colors.blue),
-                                  onPressed: () =>
-                                      _navigateToMenuDetail(storeMenu.menuId),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.blue),
-                                  onPressed: () => _navigateToStoreMenuForm(
-                                      storeMenu: storeMenu),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.red),
-                                  onPressed: () =>
-                                      _deleteStoreMenu(storeMenu.storeMenuId),
-                                ),
-                              ],
-                            ),
-                          ],
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ListTile(
+                                title: Text('${storeMenu.menu?.menuName}',
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold)),
+                                subtitle: Text(
+                                    'Description: ${storeMenu.menu?.menuDescription}',
+                                    style: const TextStyle(
+                                        fontSize: 16, color: Colors.grey)),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.restaurant,
+                                        color: Colors.blue),
+                                    onPressed: () =>
+                                        _navigateToMenuDetail(storeMenu.menuId),
+                                  ),
+                                  // IconButton(
+                                  //   icon: const Icon(Icons.edit,
+                                  //       color: Colors.blue),
+                                  //   onPressed: () => _navigateToStoreMenuForm(
+                                  //       storeMenu: storeMenu),
+                                  // ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () =>
+                                        _deleteStoreMenu(storeMenu.storeMenuId),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -263,14 +265,15 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                 }
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToStoreMenuForm(),
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      //   floatingActionButton: FloatingActionButton(
+      //     onPressed: () => _navigateToStoreMenuForm(),
+      //     backgroundColor: Colors.orange,
+      //     child: const Icon(Icons.add, color: Colors.white),
+      //   ),
+      // );
     );
   }
 

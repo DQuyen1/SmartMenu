@@ -25,4 +25,15 @@ class Menu {
       isDeleted: json['isDeleted'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'menuId': menuId,
+      'brandId': brandId,
+      'menuName': menuName,
+      'menuDescription': menuDescription,
+      'productGroups': productGroups,
+      'isDeleted': isDeleted,
+    };
+  }
 }
