@@ -12,7 +12,7 @@ class TemplateRepository {
     try {
       final response = await service.get(url, queryParameters: {
         'pageNumber': 1,
-        'pageSize': 10,
+        'pageSize': 1000000,
         'brandId': brandId,
       });
       log(response.toString());
@@ -46,6 +46,31 @@ class TemplateRepository {
       return false;
     } catch (e) {
       throw Exception('Error updating template: $e');
+    }
+  }
+
+  Future<Template> getTemplateById(int templateId) async {
+    try {
+      final response = await service.get('$url', queryParameters: {
+        'templateId': templateId,
+        'pageNumber': 1,
+        'pageSize': 10,
+      });
+      log(response.toString());
+
+      if (response.statusCode == 200) {
+        final List<dynamic> templates = response.data;
+        if (templates.isNotEmpty) {
+          return Template.fromJson(templates.first);
+        } else {
+          throw Exception('Template not found');
+        }
+      } else {
+        throw Exception(
+            'Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error fetching data: $error');
     }
   }
 }

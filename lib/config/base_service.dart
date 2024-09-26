@@ -3,9 +3,9 @@ import 'package:smart_menu/repository/auth_repository.dart';
 
 class BaseService {
   final Dio _dio = Dio(BaseOptions(
-    connectTimeout: Duration(seconds: 5), // 5 seconds
-    receiveTimeout: Duration(seconds: 5), // 5 seconds
-  ));
+      // connectTimeout: Duration(seconds: 5),
+      // receiveTimeout: Duration(seconds: 5),
+      ));
   BaseService() {
     _dio.interceptors.add(
       InterceptorsWrapper(

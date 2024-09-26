@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/store_collection.dart';
+import 'package:smart_menu/presentation/screens/store_collection_detail.dart';
 import 'package:smart_menu/presentation/screens/store_menu_detail.dart';
 import 'package:smart_menu/repository/store_collection_repository.dart';
 import 'package:smart_menu/presentation/screens/partner/store_collection_form.dart';
@@ -76,9 +77,9 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StoreMenuDetail(
+        builder: (context) => StoreCollectionDetail(
           brandId: widget.brandId,
-          menuId: collectionId,
+          collectionId: collectionId,
         ),
       ),
     );

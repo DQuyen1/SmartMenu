@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/template.dart';
+import 'package:smart_menu/presentation/screens/template_detail.dart';
 import 'package:smart_menu/repository/template_repository.dart';
 
 class TemplateListScreen extends StatefulWidget {
@@ -31,6 +32,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
     setState(() {
       _futureTemplates =
           _templateRepository.getAll(widget.brandId).then((templates) {
+        templates = templates
+            .where((template) =>
+                template.templateImgPath != null &&
+                template.templateImgPath!.isNotEmpty)
+            .toList();
+
         switch (_sortOption) {
           case 'newest':
             templates.sort((a, b) => b.templateId.compareTo(a.templateId));
@@ -90,11 +97,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
           ),
         ),
         body: SingleChildScrollView(
-          // Wrap here
-          child: Column(
-            children: [
-              _buildSearchUI(),
-              FutureBuilder<List<Template>>(
+          child: Column(children: [
+            _buildSearchUI(),
+            FutureBuilder<List<Template>>(
                 future: _futureTemplates,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -106,68 +111,74 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   } else {
                     final templates = snapshot.data!;
                     return GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1,
-                        childAspectRatio: 3 / 1,
-                      ),
-                      itemCount: templates.length,
-                      physics:
-                          const NeverScrollableScrollPhysics(), // Disable scrolling for GridView
-                      shrinkWrap:
-                          true, // Allow GridView to take the height of its children
-                      itemBuilder: (context, index) {
-                        final template = templates[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ListTile(
-                                title: Text(
-                                  template.templateName,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                          childAspectRatio: 3 / 1,
+                        ),
+                        itemCount: templates.length,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          final template = templates[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TemplateDetail(
+                                      templateId: template.templateId),
                                 ),
-                                subtitle: Text(
-                                  template.templateDescription,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                leading: Image.network(
-                                  template.templateImgPath ?? '',
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
+                              );
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      template.templateName,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      template.templateDescription,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    leading: Image.network(
+                                      template.templateImgPath ?? '',
                                       width: 50,
                                       height: 50,
-                                      color: Colors.grey,
-                                    );
-                                  },
-                                ),
-                                onTap: () {},
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          width: 50,
+                                          height: 50,
+                                          color: Colors.grey,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
+                            ),
+                          );
+                        });
                   }
-                },
-              ),
-            ],
-          ),
+                }),
+          ]),
         ));
   }
 

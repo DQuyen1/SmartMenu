@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smart_menu/presentation/screens/partner/dashboard.dart';
+import 'package:smart_menu/presentation/screens/shared/contact_profile.dart';
 import 'package:smart_menu/presentation/screens/shared/login_screen.dart';
 import 'package:smart_menu/presentation/screens/shared/profile.dart';
 
@@ -65,16 +66,16 @@ class NavBar extends StatelessWidget {
             },
           ),
           Divider(),
+          // ListTile(
+          //   leading: Icon(Icons.description),
+          //   title: Text('About us'),
+          //   onTap: () => null,
+          // ),
           ListTile(
-            leading: Icon(Icons.description),
-            title: Text('About us'),
-            onTap: () => null,
-          ),
-          ListTile(
-            leading: Icon(Icons.support_agent),
-            title: Text('Support'),
-            onTap: () => null,
-          ),
+              leading: Icon(Icons.support_agent),
+              title: Text('Support'),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ContactProfile()))),
           Divider(),
           ListTile(
             title: Text('Logout'),

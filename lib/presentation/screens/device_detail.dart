@@ -100,7 +100,7 @@ class _StoreDeviceDetailState extends State<StoreDeviceDetail> {
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 SizedBox(height: 12),
-                Text('Devicea: $deviceName', style: TextStyle(fontSize: 16)),
+                Text('Device: $deviceName', style: TextStyle(fontSize: 16)),
                 SizedBox(height: 8),
                 Text(
                     'From: ${formatDate(deviceSubscription!.subscriptionStartDate)}',
