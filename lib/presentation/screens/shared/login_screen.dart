@@ -108,6 +108,18 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             );
           }
+        } else if (response.statusCode == 400) {
+          String reply = await response.transform(utf8.decoder).join();
+          final Map<String, dynamic> responseData = jsonDecode(reply);
+
+          final errorMessage =
+              responseData['error'] ?? 'An unknown error occurred';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Incorrect username or password')),
@@ -139,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
           height: MediaQuery.of(context).size.height,
           decoration: const BoxDecoration(
             image: DecorationImage(
-                image: AssetImage('assets/images/backgroundLogin.jpg'),
+                image: AssetImage('assets/images/background.jpg'),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black45,

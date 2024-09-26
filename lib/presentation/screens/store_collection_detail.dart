@@ -3,22 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:smart_menu/models/category.dart';
 import 'package:smart_menu/models/product.dart';
 import 'package:smart_menu/repository/category_repository.dart';
+import 'package:smart_menu/repository/store_collection_repository.dart';
 import 'package:smart_menu/repository/store_menu_repository.dart';
 
-class StoreMenuDetail extends StatefulWidget {
-  final int menuId;
+class StoreCollectionDetail extends StatefulWidget {
+  final int collectionId;
   final int brandId;
 
-  const StoreMenuDetail(
-      {super.key, required this.menuId, required this.brandId});
+  const StoreCollectionDetail(
+      {super.key, required this.collectionId, required this.brandId});
 
   @override
-  State<StoreMenuDetail> createState() => _StoreMenuDetailState();
+  State<StoreCollectionDetail> createState() => _StoreCollectionDetailState();
 }
 
-class _StoreMenuDetailState extends State<StoreMenuDetail>
+class _StoreCollectionDetailState extends State<StoreCollectionDetail>
     with SingleTickerProviderStateMixin {
-  final StoreMenuRepository _storeMenuRepository = StoreMenuRepository();
+  final StoreCollectionRepository _storeCollectionRepository =
+      StoreCollectionRepository();
   late Future<List<Product>> _futureProducts;
   AnimationController? _animationController;
   Animation<double>? _animation;
@@ -63,8 +65,9 @@ class _StoreMenuDetailState extends State<StoreMenuDetail>
 
   void _fetchProducts() {
     setState(() {
-      _futureProducts =
-          _storeMenuRepository.getListProduct(widget.menuId).then((products) {
+      _futureProducts = _storeCollectionRepository
+          .getListProduct(widget.collectionId)
+          .then((products) {
         switch (_sortOption) {
           case 'newest':
             products.sort((a, b) => b.productId.compareTo(a.productId));

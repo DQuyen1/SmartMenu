@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:smart_menu/config/base_service.dart';
 import 'package:smart_menu/models/display.dart';
 
@@ -39,14 +40,25 @@ class DisplayRepository {
     }
   }
 
-  Future<bool> createDisplay(Map<String, dynamic> requestBody) async {
+  Future<Map<String, dynamic>> createDisplay(
+      Map<String, dynamic> requestBody) async {
     try {
       final response = await service.post('$url/v2', data: requestBody);
-
-      if (response.statusCode == 201) return true;
-      return false;
+      return {'success': true};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        if (e.response!.statusCode == 400) {
+          final errorMessage =
+              e.response!.data['error'] ?? 'An unknown error occurred';
+          return {'success': false, 'error': errorMessage};
+        }
+      }
+      return {
+        'success': false,
+        'error': e.message ?? 'An unexpected error occurred'
+      };
     } catch (e) {
-      throw Exception('Error creating display: $e');
+      return {'success': false, 'error': 'Error creating display: $e'};
     }
   }
 

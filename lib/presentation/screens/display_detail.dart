@@ -69,6 +69,13 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
     }
   }
 
+  String _formatDisplayTime(double? time) {
+    if (time == null) return 'Not set';
+    int hours = time.floor();
+    int minutes = ((time - hours) * 60).round();
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
+
   Future<void> _getDisplayDetails() async {
     final displayId = widget.display.displayId;
 
@@ -180,7 +187,7 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
           _buildInfoItem(
               'Template', _getTemplateName(widget.display.templateId)),
           _buildInfoItem('Display Time',
-              Future.value(widget.display.activeHour.toString())),
+              Future.value(_formatDisplayTime(widget.display.activeHour))),
           SizedBox(height: 24),
           ElevatedButton(
             onPressed: _navigateToSelectProductGroup,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_menu/models/display.dart';
+import 'package:smart_menu/presentation/screens/partner/template_debug.dart';
 import 'package:smart_menu/repository/display_repository.dart';
 import 'package:smart_menu/models/collection.dart' as collection_model;
 import 'package:smart_menu/models/store_device.dart' as device_model;
@@ -32,6 +33,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
   late TextEditingController _storeDeviceIdController;
   late TextEditingController _templateIdController;
   late double _activeHour;
+  String _formattedActiveTime = '00:00';
 
   bool isMenuIdEnabled = true;
   bool isCollectionIdEnabled = true;
@@ -64,6 +66,8 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
     _fetchCollection();
     _fetchDevice();
     _fetchTemplate();
+    _activeHour = widget.display?.activeHour ?? 0.0;
+    _formattedActiveTime = _formatTimeFromDouble(_activeHour);
   }
 
   Future<void> _fetchCollection() async {
@@ -97,10 +101,15 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
   Future<void> _fetchTemplate() async {
     try {
       final templateRepository = TemplateRepository();
-      _templateList = await templateRepository.getAll(widget.brandId);
+      final templates = await templateRepository.getAll(widget.brandId);
+      _templateList = templates
+          .where((template) =>
+              template.templateImgPath != null &&
+              template.templateImgPath!.isNotEmpty)
+          .toList();
       setState(() {});
     } catch (e) {
-      _showSnackBar('Failed to fetch menus: $e', Colors.red);
+      _showSnackBar('Failed to fetch templates: $e', Colors.red);
     }
   }
 
@@ -121,8 +130,17 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
     if (selectedTime != null) {
       setState(() {
         _activeHour = selectedTime.hour + selectedTime.minute / 60.0;
+        _formattedActiveTime =
+            '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
+        print(_activeHour);
       });
     }
+  }
+
+  String _formatTimeFromDouble(double time) {
+    int hours = time.floor();
+    int minutes = ((time - hours) * 60).round();
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
 
   void _onMenuIdChanged() {
@@ -147,18 +165,13 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
         'activeHour': _activeHour,
       };
 
-      bool success;
-      if (widget.display == null) {
-        success = await _displayRepository.createDisplay(displayData);
-      } else {
-        success = await _displayRepository.updateDisplay(
-            widget.display!.displayId, displayData);
-      }
+      final result = await _displayRepository.createDisplay(displayData);
 
-      if (success) {
+      if (result['success']) {
         Navigator.pop(context, true);
       } else {
-        _showSnackBar('Failed to save display', Colors.red);
+        _showSnackBar(
+            result['error'] ?? 'An unknown error occurred', Colors.red);
       }
     }
   }
@@ -179,7 +192,8 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(
+            seconds: 5), // Increased duration for longer messages
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
@@ -365,7 +379,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
               TextButton(
                 onPressed: () => _selectTime(context),
                 child: Text(
-                  'Select Active Hour: ${_activeHour.toStringAsFixed(2)}',
+                  'Select Active Hour: $_formattedActiveTime',
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
