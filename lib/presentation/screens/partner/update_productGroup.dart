@@ -104,8 +104,8 @@ class _SelectProductGroupScreenState extends State<SelectProductGroupScreen> {
                         items: widget.displayItemIds,
                         onChanged: (value) =>
                             setState(() => _selectedDisplayItemId = value),
-                        hint: 'Select Display Item',
-                        itemBuilder: (id) => 'Display Item $id',
+                        hint: 'Select Render Layer',
+                        itemBuilder: (id, index) => 'Render Layer ${index + 1}',
                       ),
                       SizedBox(height: 20),
                       _buildDropdown(
@@ -114,12 +114,15 @@ class _SelectProductGroupScreenState extends State<SelectProductGroupScreen> {
                         onChanged: (value) =>
                             setState(() => _selectedProductGroupId = value),
                         hint: 'Select Product Group',
-                        itemBuilder: (id) => _productGroupMap[id] ?? 'Unknown',
+                        itemBuilder: (id, _) =>
+                            _productGroupMap[id] ?? 'Unknown',
                       ),
                       Spacer(),
                       ElevatedButton(
                         onPressed: _updateProductGroup,
-                        child: Text('Change', style: TextStyle(fontSize: 16)),
+                        child: Text('Change',
+                            style:
+                                TextStyle(fontSize: 16, color: Colors.white)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
                           minimumSize: Size(double.infinity, 50),
@@ -144,7 +147,7 @@ class _SelectProductGroupScreenState extends State<SelectProductGroupScreen> {
     required List<int> items,
     required ValueChanged<int?> onChanged,
     required String hint,
-    required String Function(int) itemBuilder,
+    required String Function(int, int) itemBuilder,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -159,12 +162,14 @@ class _SelectProductGroupScreenState extends State<SelectProductGroupScreen> {
           icon: Icon(Icons.arrow_drop_down, color: Colors.teal),
           padding: EdgeInsets.symmetric(horizontal: 16),
           onChanged: onChanged,
-          items: items
-              .map((id) => DropdownMenuItem<int>(
-                    value: id,
-                    child: Text(itemBuilder(id)),
-                  ))
-              .toList(),
+          items: items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final id = entry.value;
+            return DropdownMenuItem<int>(
+              value: id,
+              child: Text(itemBuilder(id, index)),
+            );
+          }).toList(),
         ),
       ),
     );

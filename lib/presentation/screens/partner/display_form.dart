@@ -192,8 +192,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        duration: const Duration(
-            seconds: 5), // Increased duration for longer messages
+        duration: const Duration(seconds: 5),
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
