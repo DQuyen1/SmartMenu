@@ -421,10 +421,19 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
     }
 
     var sizePrices = storeProduct.product!.productSizePrices;
+    bool isVND = storeProduct.product!.productPriceCurrency == 1;
+
+    String formatPrice(double price) {
+      if (isVND) {
+        return '${price.toStringAsFixed(0)} đ';
+      } else {
+        return '\$${price.toStringAsFixed(2)}';
+      }
+    }
 
     if (sizePrices.length == 1) {
       return Text(
-        "Price: \$${sizePrices[0].price}",
+        formatPrice(sizePrices[0].price),
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 18,
@@ -444,20 +453,24 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
 
     sizePrices.forEach((psp) {
       String sizeLabel = sizeLabelsMap[psp.productSizeType] ?? "Unknown";
-
       if (sizeLabel != "Unknown") {
         sizeLabels.add(sizeLabel);
-        priceLabels.add("\$${psp.price}");
+        priceLabels.add(formatPrice(psp.price));
       }
     });
 
     if (sizeLabels.isEmpty) {
-      return Text("No sizes available");
+      return Text("");
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          "Prices:",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: sizeLabels
@@ -477,6 +490,7 @@ class _StoreProductListScreenState extends State<StoreProductListScreen>
                   ))
               .toList(),
         ),
+        SizedBox(height: 4),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: priceLabels

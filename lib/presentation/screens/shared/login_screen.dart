@@ -151,12 +151,14 @@ class _LoginScreenState extends State<LoginScreen> {
           height: MediaQuery.of(context).size.height,
           decoration: const BoxDecoration(
             image: DecorationImage(
-                image: AssetImage('assets/images/backgroundLogin.jpg'),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.black45,
-                  BlendMode.darken,
-                )),
+              image: NetworkImage(
+                  'https://i.pinimg.com/564x/4b/05/0c/4b050ca4fcf588eedc58aa6135f5eecf.jpg'),
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black45,
+                BlendMode.darken,
+              ),
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,

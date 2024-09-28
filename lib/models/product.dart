@@ -5,7 +5,6 @@ class Product {
   final String productDescription;
   final int productPriceCurrency;
   final String productImgPath;
-  final String? productLogoPath;
   final List<ProductSizePrice> productSizePrices;
   final bool isDeleted;
 
@@ -16,7 +15,6 @@ class Product {
     required this.productDescription,
     required this.productPriceCurrency,
     required this.productImgPath,
-    this.productLogoPath,
     required this.productSizePrices,
     required this.isDeleted,
   });
@@ -33,7 +31,6 @@ class Product {
       productDescription: json['productDescription'],
       productPriceCurrency: json['productPriceCurrency'],
       productImgPath: json['productImgPath'],
-      productLogoPath: json['productLogoPath'],
       productSizePrices: sizePricesList,
       isDeleted: json['isDeleted'],
     );
@@ -47,7 +44,6 @@ class Product {
       'productDescription': productDescription,
       'productPriceCurrency': productPriceCurrency,
       'productImgPath': productImgPath,
-      'productLogoPath': productLogoPath,
       'productSizePrices': productSizePrices.map((i) => i.toJson()).toList(),
       'isDeleted': isDeleted,
     };

@@ -84,9 +84,13 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text('Popular',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
                     _carouselSlider(context),
                     const SizedBox(height: 24),
-                    _buildKeyMetrics(),
+                    // _buildKeyMetrics(),
                     const SizedBox(height: 24),
                     _buildManageOptions(context),
                   ],

@@ -76,53 +76,16 @@ class _TemplateDetailState extends State<TemplateDetail> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Name:',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          template.templateName,
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        _buildTemplateInfoItem('Name:', template.templateName),
                         SizedBox(height: 16),
-                        Text(
-                          'Description:',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          template.templateDescription,
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        _buildTemplateInfoItem(
+                            'Description:', template.templateDescription),
                         SizedBox(height: 16),
-                        Text(
-                          'Width:',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${template.templateWidth}',
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        _buildTemplateInfoItem(
+                            'Width:', '${template.templateWidth}'),
                         SizedBox(height: 16),
-                        Text(
-                          'Height:',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${template.templateHeight}',
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        _buildTemplateInfoItem(
+                            'Height:', '${template.templateHeight}'),
                       ],
                     ),
                   ),
@@ -131,6 +94,46 @@ class _TemplateDetailState extends State<TemplateDetail> {
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildTemplateInfoItem(String label, String value) {
+    return Container(
+      width: double.infinity, // This makes sure the field takes full width
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
       ),
     );
   }

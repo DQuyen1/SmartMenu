@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:smart_menu/models/display.dart';
 import 'package:smart_menu/presentation/screens/partner/update_productGroup.dart';
 import 'package:smart_menu/repository/display_repository.dart';
@@ -23,14 +26,39 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
     super.initState();
     _getDisplayDetails();
     HttpOverrides.global = _DevHttpOverrides();
+    _setFullScreen();
+    print('Display:  ${widget.display.displayId}');
+  }
+
+  void _setFullScreen() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
+
+  void _setOrientation(bool isHorizontal) {
+    if (isHorizontal) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    super.dispose();
   }
 
   Future<String> _getMenuName(int? menuId) async {
     if (menuId == null) return '';
-
     try {
-      final menuName = await _repository.getMenuName(menuId);
-      return menuName;
+      return await _repository.getMenuName(menuId);
     } catch (e) {
       return 'Error fetching menu';
     }
@@ -38,10 +66,8 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
 
   Future<String> _getCollectionName(int? collectionId) async {
     if (collectionId == null) return '';
-
     try {
-      final collectionName = await _repository.getCollectionName(collectionId);
-      return collectionName;
+      return await _repository.getCollectionName(collectionId);
     } catch (e) {
       return 'Error fetching collection';
     }
@@ -49,10 +75,8 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
 
   Future<String> _getDeviceName(int? storeDeviceId) async {
     if (storeDeviceId == null) return 'No device';
-
     try {
-      final deviceName = await _repository.getDeviceName(storeDeviceId);
-      return deviceName;
+      return await _repository.getDeviceName(storeDeviceId);
     } catch (e) {
       return 'Error fetching device';
     }
@@ -60,10 +84,8 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
 
   Future<String> _getTemplateName(int? templateId) async {
     if (templateId == null) return '';
-
     try {
-      final templateName = await _repository.getTemplateName(templateId);
-      return templateName;
+      return await _repository.getTemplateName(templateId);
     } catch (e) {
       return 'Error fetching template';
     }
@@ -78,15 +100,10 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
 
   Future<void> _getDisplayDetails() async {
     final displayId = widget.display.displayId;
-
     try {
       final displayDetails = await _repository.getDisplayDetails(displayId);
-
       if (displayDetails.containsKey('displayItemIds') &&
           displayDetails.containsKey('productGroupIds')) {
-        print('Display Item IDs: ${displayDetails['displayItemIds']}');
-        print('Product Group IDs: ${displayDetails['productGroupIds']}');
-
         setState(() {
           _displayItemIds = List<int>.from(displayDetails['displayItemIds']);
           _productGroupIds = List<int>.from(displayDetails['productGroupIds']);
@@ -114,6 +131,66 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
     );
   }
 
+  Future<Size> _getImageDimensions(String imageUrl) async {
+    final ImageProvider provider = NetworkImage(imageUrl);
+    final ImageStream stream = provider.resolve(ImageConfiguration());
+    final Completer<Size> completer = Completer();
+    final listener = ImageStreamListener((ImageInfo info, bool _) {
+      completer.complete(Size(
+        info.image.width.toDouble(),
+        info.image.height.toDouble(),
+      ));
+    });
+    stream.addListener(listener);
+    final size = await completer.future;
+    stream.removeListener(listener);
+    return size;
+  }
+
+  void _showFullScreenImage(BuildContext context) {
+    if (widget.display.displayImgPath == null) return;
+
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => Scaffold(
+        body: FutureBuilder<Size>(
+          future: _getImageDimensions(widget.display.displayImgPath!),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasData) {
+              final size = snapshot.data!;
+              final isHorizontal = size.width > size.height;
+
+              _setOrientation(isHorizontal);
+
+              return WillPopScope(
+                onWillPop: () async {
+                  _setOrientation(false); // Reset to portrait when exiting
+                  return true;
+                },
+                child: Container(
+                  color: Colors.black,
+                  child: PhotoView(
+                    imageProvider: NetworkImage(widget.display.displayImgPath!),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.covered * 2,
+                    backgroundDecoration: BoxDecoration(color: Colors.black),
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    customSize: MediaQuery.of(context).size,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              );
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,69 +213,73 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
   }
 
   Widget _buildDisplayImage() {
-    return Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        image: widget.display.displayImgPath != null &&
-                Uri.tryParse(widget.display.displayImgPath!)?.hasAbsolutePath ==
-                    true
-            ? DecorationImage(
-                image: NetworkImage(widget.display.displayImgPath!),
-                fit: BoxFit.cover,
-              )
+    return GestureDetector(
+      onTap: () => _showFullScreenImage(context),
+      child: Container(
+        width: double.infinity,
+        height: 200,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          image: widget.display.displayImgPath != null &&
+                  Uri.tryParse(widget.display.displayImgPath!)
+                          ?.hasAbsolutePath ==
+                      true
+              ? DecorationImage(
+                  image: NetworkImage(widget.display.displayImgPath!),
+                  fit: BoxFit.cover,
+                )
+              : null,
+        ),
+        child: widget.display.displayImgPath == null
+            ? Icon(Icons.image, color: Colors.grey.shade400, size: 64)
             : null,
       ),
-      child: widget.display.displayImgPath == null
-          ? Icon(Icons.image, color: Colors.grey.shade400, size: 64)
-          : null,
     );
   }
 
   Widget _buildInfoSection() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Color(0xFFF0F0F7),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: Offset(0, -5),
-          ),
-        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildInfoItem(
               'Device', _getDeviceName(widget.display.storeDeviceId)),
+          SizedBox(height: 12),
           if (widget.display.collectionId != null)
             _buildInfoItem(
                 'Collection', _getCollectionName(widget.display.collectionId))
           else if (widget.display.menuId != null)
             _buildInfoItem('Menu', _getMenuName(widget.display.menuId)),
+          SizedBox(height: 12),
           _buildInfoItem(
               'Template', _getTemplateName(widget.display.templateId)),
+          SizedBox(height: 12),
           _buildInfoItem('Display Time',
               Future.value(_formatDisplayTime(widget.display.activeHour))),
           SizedBox(height: 24),
           ElevatedButton(
             onPressed: _navigateToSelectProductGroup,
-            child: Text('Change Product On Display'),
+            child: Text(
+              'Change Product Group',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.teal,
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              padding: EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(12),
               ),
+              minimumSize: Size(double.infinity, 50),
             ),
           ),
         ],
@@ -207,8 +288,19 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
   }
 
   Widget _buildInfoItem(String label, Future<String> futureValue) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -216,8 +308,8 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
             label,
             style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(height: 4),
@@ -225,14 +317,23 @@ class _DisplayDetailScreenState extends State<DisplayDetailScreen> {
             future: futureValue,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Text('Loading...', style: TextStyle(fontSize: 16));
+                return Text('Loading...',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}',
-                    style: TextStyle(fontSize: 16, color: Colors.red));
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold));
               } else {
                 return Text(
                   snapshot.data ?? 'Not available',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 );
               }
             },

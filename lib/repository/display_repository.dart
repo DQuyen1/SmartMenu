@@ -1,7 +1,10 @@
 import 'dart:developer';
+import 'dart:typed_data';
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:smart_menu/config/base_service.dart';
 import 'package:smart_menu/models/display.dart';
+import 'package:flutter/material.dart';
 
 class DisplayRepository {
   static const String url =
@@ -279,6 +282,27 @@ class DisplayRepository {
       }
     } catch (e) {
       throw Exception('Error fetching product group name: $e');
+    }
+  }
+
+  Future<List<Image>> getDisplayImage(int displayId) async {
+    final url =
+        'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Displays/V2/$displayId/image';
+
+    try {
+      final response = await service.get(url);
+      if (response.statusCode == 200) {
+        final Uint8List imageData = response.data;
+
+        return [Image.memory(imageData)];
+      } else {
+        throw Exception(
+            'Failed to load images. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Log the error and throw an exception
+      log('Error fetching display image: $error');
+      throw Exception('Error fetching display image: $error');
     }
   }
 }

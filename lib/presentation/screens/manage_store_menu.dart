@@ -148,9 +148,7 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
-          onPressed: () {
-            // Dismiss the snackbar
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -220,43 +218,43 @@ class _StoreMenuListScreenState extends State<StoreMenuListScreen> {
                         ),
                         color: backgroundColor,
                         child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ListTile(
-                                title: Text('${storeMenu.menu?.menuName}',
+                          child: GestureDetector(
+                            onTap: () =>
+                                _navigateToMenuDetail(storeMenu.menuId),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ListTile(
+                                  title: Text(
+                                    '${storeMenu.menu?.menuName}',
                                     style: const TextStyle(
                                         fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
-                                subtitle: Text(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
                                     'Description: ${storeMenu.menu?.menuDescription}',
                                     style: const TextStyle(
-                                        fontSize: 16, color: Colors.grey)),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.restaurant,
-                                        color: Colors.blue),
-                                    onPressed: () =>
-                                        _navigateToMenuDetail(storeMenu.menuId),
+                                        fontSize: 16, color: Colors.grey),
                                   ),
-                                  // IconButton(
-                                  //   icon: const Icon(Icons.edit,
-                                  //       color: Colors.blue),
-                                  //   onPressed: () => _navigateToStoreMenuForm(
-                                  //       storeMenu: storeMenu),
-                                  // ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    onPressed: () =>
-                                        _deleteStoreMenu(storeMenu.storeMenuId),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    // Remove the first icon button as the gesture is handled by the ListTile tap
+                                    // IconButton(
+                                    //   icon: const Icon(Icons.restaurant, color: Colors.blue),
+                                    //   onPressed: () => _navigateToMenuDetail(storeMenu.menuId),
+                                    // ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteStoreMenu(
+                                          storeMenu.storeMenuId),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );

@@ -170,8 +170,7 @@ class _DisplayFormScreenState extends State<DisplayFormScreen> {
       if (result['success']) {
         Navigator.pop(context, true);
       } else {
-        _showSnackBar(
-            result['error'] ?? 'An unknown error occurred', Colors.red);
+        _showSnackBar(result['error'] ?? 'Can not create display. Please try again', Colors.red);
       }
     }
   }

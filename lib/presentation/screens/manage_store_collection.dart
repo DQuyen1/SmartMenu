@@ -230,51 +230,46 @@ class _StoreCollectionListScreenState extends State<StoreCollectionListScreen> {
                         ),
                         color: backgroundColor,
                         child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ListTile(
-                                title: Text(
-                                  '${storeCollection.collection?.collectionName}',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                          child: GestureDetector(
+                            onTap: () => _navigateToCollectionDetail(
+                                storeCollection.collectionId),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ListTile(
+                                  title: Text(
+                                    '${storeCollection.collection?.collectionName}',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    'Description: ${storeCollection.collection?.collectionDescription}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
-                                subtitle: Text(
-                                  'Description: ${storeCollection.collection?.collectionDescription}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                  ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    // No need for this IconButton as the whole ListTile is tappable now
+                                    // IconButton(
+                                    //   icon: const Icon(Icons.restaurant, color: Colors.blue),
+                                    //   onPressed: () => _navigateToCollectionDetail(storeCollection.collectionId),
+                                    // ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteStoreCollection(
+                                          storeCollection.storeCollectionId),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.restaurant,
-                                        color: Colors.blue),
-                                    onPressed: () =>
-                                        _navigateToCollectionDetail(
-                                            storeCollection.collectionId),
-                                  ),
-                                  // IconButton(
-                                  //   icon: const Icon(Icons.edit,
-                                  //       color: Colors.blue),
-                                  //   onPressed: () =>
-                                  //       _navigateToStoreCollectionForm(
-                                  //           storeCollection: storeCollection),
-                                  // ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    onPressed: () => _deleteStoreCollection(
-                                        storeCollection.storeCollectionId),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );

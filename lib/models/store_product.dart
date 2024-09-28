@@ -38,8 +38,8 @@ class Product {
   final int categoryId;
   final String productName;
   final String productDescription;
+  final int productPriceCurrency;
   final String? productImgPath;
-  final String? productLogoPath;
   final List<ProductSizePrice> productSizePrices;
   final bool isDeleted;
 
@@ -48,8 +48,8 @@ class Product {
     required this.categoryId,
     required this.productName,
     required this.productDescription,
+    required this.productPriceCurrency,
     required this.productImgPath,
-    required this.productLogoPath,
     required this.productSizePrices,
     required this.isDeleted,
   });
@@ -64,8 +64,8 @@ class Product {
       categoryId: json['categoryId'],
       productName: json['productName'],
       productDescription: json['productDescription'],
+      productPriceCurrency: json['productPriceCurrency'],
       productImgPath: json['productImgPath'],
-      productLogoPath: json['productLogoPath'],
       productSizePrices: productSizePricesList,
       isDeleted: json['isDeleted'],
     );
@@ -76,7 +76,7 @@ class ProductSizePrice {
   final int productSizePriceId;
   final int productId;
   final int productSizeType;
-  final int price;
+  final double price;
   final bool isDeleted;
 
   ProductSizePrice({
@@ -92,7 +92,9 @@ class ProductSizePrice {
       productSizePriceId: json['productSizePriceId'],
       productId: json['productId'],
       productSizeType: json['productSizeType'],
-      price: json['price'],
+      price: json['price'] is int
+          ? (json['price'] as int).toDouble()
+          : json['price'],
       isDeleted: json['isDeleted'],
     );
   }
